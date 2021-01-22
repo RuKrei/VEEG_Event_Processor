@@ -1,0 +1,12 @@
+	source 	description	time_from_onset 	order_of_occurence 	source  	time_from_onset  	order_of_occurence  	source	time_from_onset	order_of_occurence
+1	PC19012021_F1.edf	e-n3	162.36	2.0						1
+3	PC19012021_F1.edf	e-maf-r	171.4	4.0						2
+4	PC19012021_F1.edf	e-maf-l	174.24	5.0	PC19012021_F3.edf	-0.08999999999991815	17.0			3
+5	PC19012021_F1.edf	e-th-t7	175.97	6.0						4
+12	PC19012021_F1.edf	e-th-t7-ends	188.38	13.0						5
+13	PC19012021_F1.edf	e-maf	188.71	14.0						6
+15	PC19012021_F1.edf	e-delta-bilat	191.68	16.0						7
+17	PC19012021_F1.edf	e-alpha-o	196.65	18.0	PC19012021_F3.edf	4.1400000000001	20.0			8
+18	PC19012021_F1.edf	e-ends	208.65	19.0	PC19012021_F3.edf	41.74000000000001	31.0			9
+66		e-Beginn			PC19012021_F3.edf	0.0	18.0			10
+69		e-bew			PC19012021_F3.edf	13.170000000000073	22.0			11

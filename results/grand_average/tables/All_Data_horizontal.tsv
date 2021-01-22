@@ -1,0 +1,97 @@
+	source 	description	time_from_onset 	order_of_occurence 	source  	time_from_onset  	order_of_occurence  	source	time_from_onset	order_of_occurence
+0	PC19012021_F1.edf	* Teilstuck Nr.  1 *	0.0	1.0	PC19012021_F3.edf	-1461.29	1.0	PC19012021_F2.edf	0.0	1.0
+1	PC19012021_F1.edf	e-n3	162.36	2.0						
+2	PC19012021_F1.edf	s-klonus-mund-l	171.36	3.0						
+3	PC19012021_F1.edf	e-maf-r	171.4	4.0						
+4	PC19012021_F1.edf	e-maf-l	174.24	5.0	PC19012021_F3.edf	-0.08999999999991815	17.0			
+5	PC19012021_F1.edf	e-th-t7	175.97	6.0						
+6	PC19012021_F1.edf	ODER s-figure-4-ext-l	177.37	7.0						
+7	PC19012021_F1.edf	s-dys-ext-a-l	177.43	8.0						
+8	PC19012021_F1.edf	s-dys-flex-a-r	178.57	9.0						
+9	PC19012021_F1.edf	s-kloni-finger-l	184.7	10.0						
+10	PC19012021_F1.edf	s-blinzeln	185.34	11.0						
+11	PC19012021_F1.edf	s-auto-l-dys-r	187.43	12.0						
+12	PC19012021_F1.edf	e-th-t7-ends	188.38	13.0						
+13	PC19012021_F1.edf	e-maf	188.71	14.0						
+14	PC19012021_F1.edf	s-figure-4-ext-l + dys-b-l	190.98	15.0						
+15	PC19012021_F1.edf	e-delta-bilat	191.68	16.0						
+16	PC19012021_F1.edf	s-ton-dev-kopf-r	192.21	17.0						
+17	PC19012021_F1.edf	e-alpha-o	196.65	18.0	PC19012021_F3.edf	4.1400000000001	20.0			
+18	PC19012021_F1.edf	e-ends	208.65	19.0	PC19012021_F3.edf	41.74000000000001	31.0			
+19	PC19012021_F1.edf	s-ende	210.45	20.0						
+20	PC19012021_F1.edf	Name1	221.8	21.0						
+21	PC19012021_F1.edf	Faustschluß bds. bei AHV1	229.3	22.0						
+22	PC19012021_F1.edf	Rad fahren1	236.2	23.0						
+23	PC19012021_F1.edf	Verkehrsschild1	240.69	24.0						
+24	PC19012021_F1.edf	Verkehrsschild1	274.11	28.0						
+25	PC19012021_F1.edf	Farbe1	245.32	25.0						
+26	PC19012021_F1.edf	Verkehrssituation1	257.46	26.0						
+27	PC19012021_F1.edf	Verkehrszeichen1	264.38	27.0				PC19012021_F2.edf	206.36	16.0
+28	PC19012021_F1.edf	Verkehrszeichen1	264.38	27.0				PC19012021_F2.edf	230.89	20.0
+29	PC19012021_F1.edf	Blinzeln li.1 bei Reaktionstest	281.21	29.0						
+30	PC19012021_F1.edf	Blinzeln re.0 bei Reaktionstest	286.62	30.0						
+31	PC19012021_F1.edf	Prüfung Gesichtsfeld	307.15	31.0						
+32	PC19012021_F1.edf	takt. Reiz1	319.16	32.0						
+33	PC19012021_F1.edf	Kopf nicken1	322.43	33.0						
+34	PC19012021_F1.edf	Fixation1	326.28	34.0						
+35	PC19012021_F1.edf	Zunge1	328.96	35.0						
+36	PC19012021_F1.edf	AHV1	333.35	36.0						
+37	PC19012021_F1.edf	Zählen1	340.3	37.0						
+38	PC19012021_F1.edf	Nachsprechen1	347.13	38.0						
+39	PC19012021_F1.edf	Benennen1	351.52	39.0						
+40	PC19012021_F1.edf	Erkennen1	357.25	40.0				PC19012021_F2.edf	212.33	17.0
+41	PC19012021_F1.edf	Merkworte nachsprechen1	366.04	41.0						
+42	PC19012021_F1.edf	Merksymbole	371.74	42.0						
+43	PC19012021_F1.edf	Stadt1	395.43	43.0						
+44	PC19012021_F1.edf	Monat1	398.16	44.0						
+45	PC19012021_F1.edf	Ort1	402.96	45.0						
+46	PC19012021_F1.edf	Tageszeit1	408.64	46.0						
+47	PC19012021_F1.edf	Merkworte1	424.96	47.0						
+48	PC19012021_F1.edf	Merksymbole1	433.49	48.0						
+49	PC19012021_F1.edf	M0	442.88	49.0						
+50	PC19012021_F1.edf	L1	446.58	50.0						
+51		* Teilstuck Nr.  2 *			PC19012021_F3.edf	-1332.3799999999999	2.0			
+52		s-klon-ges-r			PC19012021_F3.edf	-1202.6	3.0			
+53		Arousal?			PC19012021_F3.edf	-1192.46	4.0			
+54		Mundbewegung			PC19012021_F3.edf	-1072.58	5.0			
+55		Kopfbewegung			PC19012021_F3.edf	-964.02	6.0			
+56		Kopfbewegung			PC19012021_F3.edf	-845.52	7.0			
+57		Kopfbewegung			PC19012021_F3.edf	-435.03999999999996	11.0			
+58		Einschlafmyoklonie?			PC19012021_F3.edf	-766.8	8.0			
+59		Lidbewegung			PC19012021_F3.edf	-732.75	9.0			
+60		Bewegung			PC19012021_F3.edf	-531.5999999999999	10.0			
+61		* Teilstuck Nr.  3 *			PC19012021_F3.edf	-258.90999999999985	12.0			
+62		Lidmyoklonie			PC19012021_F3.edf	-227.32999999999993	13.0			
+63		* Teilstuck Nr.  4 *			PC19012021_F3.edf	-190.81999999999994	14.0			
+64		BEWEGUNG			PC19012021_F3.edf	-107.75	15.0			
+65		N2			PC19012021_F3.edf	-9.629999999999882	16.0			
+66		e-Beginn			PC19012021_F3.edf	0.0	18.0			
+67		s-tonisch			PC19012021_F3.edf	1.650000000000091	19.0			
+68		i-beugen-arme			PC19012021_F3.edf	7.3900000000001	21.0			
+69		e-bew			PC19012021_F3.edf	13.170000000000073	22.0			
+70		i-lagewechsel-r			PC19012021_F3.edf	17.75999999999999	23.0			
+71		s-kopf-r			PC19012021_F3.edf	18.360000000000127	24.0			
+72		s-dys-l			PC19012021_F3.edf	19.220000000000027	25.0			
+73		s-klini-a-l			PC19012021_F3.edf	19.309999999999945	26.0			
+74		s-pedal-l			PC19012021_F3.edf	20.529999999999973	27.0			
+75		s-ton-b-l			PC19012021_F3.edf	29.090000000000146	28.0			
+76		F7			PC19012021_F3.edf	33.210000000000036	29.0			
+77		i-bein-runter			PC19012021_F3.edf	37.319999999999936	30.0			
+78		s-Mimik Änderung						PC19012021_F2.edf	149.41	2.0
+79		i-frag-geste						PC19012021_F2.edf	150.18	3.0
+80		EKG						PC19012021_F2.edf	150.57	4.0
+81		EKG						PC19012021_F2.edf	271.27	22.0
+82		i-überschläft-bein-r						PC19012021_F2.edf	152.77	5.0
+83		s-schnauft						PC19012021_F2.edf	164.84	6.0
+84		MARKER 1						PC19012021_F2.edf	165.69	7.0
+85		s-sprache						PC19012021_F2.edf	169.57	8.0
+86		MARKER 2						PC19012021_F2.edf	174.47	9.0
+87		vollständig kontaktfähig						PC19012021_F2.edf	180.55	10.0
+88		Ansprache1						PC19012021_F2.edf	184.05	11.0
+89		Radfahren1						PC19012021_F2.edf	186.05	12.0
+90		Radfahren1						PC19012021_F2.edf	216.39	18.0
+91		Armbewegungen1						PC19012021_F2.edf	188.34	13.0
+92		"""Ich habe das Kribbeln"""						PC19012021_F2.edf	193.46	14.0
+93		"bekanntes Kribbeln, ""Wie immer"""						PC19012021_F2.edf	201.39	15.0
+94		kreisende Armbewegungen1						PC19012021_F2.edf	219.08	19.0
+95		"""Jetzt habe ich es nimmer"""						PC19012021_F2.edf	234.21	21.0
