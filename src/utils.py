@@ -134,6 +134,7 @@ def plot_seizure_horizontal(df=None, eeg=None, semio=None, tmin= 0,
         plt.axvline(x=0, color="r")
     for l in sep_lines:
         plt.axvline(x=l, color="lightblue", ls=":")
+    fig.subplots_adjust(hspace=0.8)
     return fig
 
 
@@ -206,6 +207,7 @@ def plot_seizure_vertical(df=None, eeg=None, semio=None, testing=None,
     sep_lines = loc_of_sep_lines(df, graph_sep_line_width)
     for l in sep_lines:
         plt.axhline(y=l, color="lightblue", ls=":")
+    fig.subplots_adjust(hspace=0.2)
     return fig
 
 
@@ -215,35 +217,60 @@ def raw_to_df(raw, edf=None):
     df = df.drop(to_drop, axis=1)
     if "Beginn" in str(df["description"]):
         samp_beginn = df[df["description"].str.contains("Beginn")]["onset"]
+        print("samp_beginn = ", samp_beginn)
+        onset = samp_beginn.astype(int)
         if isinstance(samp_beginn, pd.core.series.Series):
             print(f"There are multiple markers for seizure onset in this file --> taking first one.")
-            samp_beginn = samp_beginn.iloc[0]
+            samp_beginn = samp_beginn.iloc[0].astype(int)
+            onset = samp_beginn
     else:
         print("Error: No marker containing \"Beginn\" found, cannot determine seizure onset for file: ", edf)
         print("Setting seizure onset to the beginning of the file")
-        samp_beginn = 0
+        samp_beginn = int(0)
+        onset = "No seizure onset was marked"
     df["time_from_onset"] = df["onset"] - float(samp_beginn)
     df = df.drop(["orig_time"], axis=1)
-    return df
+    df["source"] = edf.split("/")[-1]
+    cols = list(df)
+    cols.insert(0, cols.pop(cols.index('source')))
+    df = df.loc[:, cols]
+    return df, onset
 
 
 def extract_groups(df, edf=None):
     e_events = df[df["description"].str.startswith("e-")]
+    e_events["source"] = edf
     s_events = df[df["description"].str.startswith("s-")]
+    s_events["source"] = edf
+    # All other flags should be testing or ignored, so:
     t_events = df[~df["description"].str.startswith("s-")]
-    t_events = t_events[~df["description"].str.startswith("e-")]
+    t_events = t_events[~t_events["description"].str.startswith("e-")]
+    t_events = t_events[~t_events["description"].str.startswith("i-")]
+    t_events["source"] = edf
     return e_events, s_events, t_events
 
 
-def extract_ordered_groups(df=None):
+def extract_ordered_groups(df=None, source=None):
     df = df.drop_duplicates(subset=["description"], keep="first")
     e_events = df[df["description"].str.startswith("e-")]
     e_events["order_of_occurence"] = (np.arange(len(e_events.axes[0])) +1).astype(int)
+    e_events["source"] = source.split("/")[-1]
+    cols = list(e_events)
+    cols.insert(0, cols.pop(cols.index('source')))
+    e_events = e_events.loc[:, cols]
     s_events = df[df["description"].str.startswith("s-")]
     s_events["order_of_occurence"] = (np.arange(len(s_events.axes[0])) +1).astype(int)
+    s_events["source"] = source.split("/")[-1]
+    cols = list(s_events)
+    cols.insert(0, cols.pop(cols.index('source')))
+    s_events = s_events.loc[:, cols]
     t_events = df[~df["description"].str.startswith("s-")]
     t_events = t_events[~df["description"].str.startswith("e-")]
     t_events["order_of_occurence"] = (np.arange(len(t_events.axes[0])) +1).astype(int)
+    t_events["source"] = source.split("/")[-1]
+    cols = list(t_events)
+    cols.insert(0, cols.pop(cols.index('source')))
+    t_events = t_events.loc[:, cols]
     return e_events, s_events, t_events
 
 
@@ -261,7 +288,7 @@ def make_folders(e):
 
 def shrink_df_to_tmax(df=None, tmax=None, tmin=None):
     shrink_df = df[df["time_from_onset"] < tmax]
-    shrink_df = shrink_df[shrink_df["time_from_onset"] > plot_tmin]
+    shrink_df = shrink_df[shrink_df["time_from_onset"] > tmin]
     return shrink_df
 
 
@@ -327,7 +354,7 @@ def plot_interactive_subplot_with_table(df=None, eeg=None, semio=None, testing=N
                                 [{"type": "scatter"}],
                                 [{"type": "scatter"}],
                                 [{"type": "scatter"}]],
-                        subplot_titles=("Events", "EEG", "Semiologie", "Testing", "All events"),
+                        subplot_titles=("Events", "EEG", "Semiology", "Testing", "All events"),
                         row_width=[0.1, 0.1, 0.1, 0.1, 0.8])
     # Add traces
     # data
@@ -339,7 +366,6 @@ def plot_interactive_subplot_with_table(df=None, eeg=None, semio=None, testing=N
                             align="left")
                         ),
                         row=1, col=1)
-    
     # scatter plots
     x_axis = df["time_from_onset"]
     y_axis = np.ones_like(x_axis)
@@ -381,8 +407,44 @@ def plot_interactive_subplot_with_table(df=None, eeg=None, semio=None, testing=N
     return fig
 
 
+def plot_eventcounts(df=None, eeg=None, semio=None, source=None):
+    fig, ax = plt.subplots(figsize=(15,26))
+    plt.suptitle(str(source) + " - Event counts")
+    #EEG
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.set_title("EEG Events")
+    if len(eeg['description'].value_counts()) > 0:
+        sns.countplot(y="description", data=eeg, orient="h", ax=ax1, order = eeg['description'].value_counts().index)
+    else:
+        #plt.plot(x=1, y=1)
+        ax1.set_title("No EEG events found in file...")
+    #Semiology
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.set_title("Semiology Events")
+    if len(semio['description'].value_counts()) > 0:
+        sns.countplot(y="description", data=semio, orient="h", ax=ax2, order = semio['description'].value_counts().index)
+    else:
+        #plt.plot(x=1, y=1)
+        ax2.set_title("No Semiology events found in file...")
+    ax.set_yticks([])
+    ax.set_axis_off()
+    fig.subplots_adjust(hspace=0.2)
+    return fig
+
+
 def save_plotly_to_html(fig=None, source=None):
     save_dir = "../results/" + source + "/viz/"
     save_name = save_dir + source + "_interactive_viz.html"
     fig.write_html(save_name)
+
+
+def extract_parameters_from_raw(raw=None):
+    highp = raw.info["highpass"]
+    lowp = raw.info["lowpass"]
+    sfreq = raw.info["sfreq"]
+    aq = raw.info["meas_date"]
+    channels = raw.info["ch_names"]
+    nr_channels = raw.info["nchan"]
+    return highp, lowp, sfreq, aq, channels, nr_channels
+
 
