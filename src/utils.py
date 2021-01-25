@@ -448,3 +448,57 @@ def extract_parameters_from_raw(raw=None):
     return highp, lowp, sfreq, aq, channels, nr_channels
 
 
+def plot_interactive_tables(ga_h=None, EEG_ga=None, semio_ga=None, test_ga=None):
+    fig = make_subplots(rows=4, cols=1, 
+                        specs=[[{"type": "table"}],
+                                [{"type": "table"}],
+                                [{"type": "table"}],
+                                [{"type": "table"}]],
+                        subplot_titles=("All data horizontal", "EEG grand average", "Semiology grand average", "Testing grand average"),
+                        vertical_spacing=0.05
+
+                        )
+    # Add traces
+    # All data (horizontal view)
+    fig.add_trace(go.Table(
+                        header=dict(
+                                values=ga_h.columns[:], font=dict(size=10)),
+                        cells=dict(
+                            values=[ga_h[i].values.tolist() for i in ga_h.columns[:]],
+                            align="left")
+                        ),
+                        row=1, col=1)
+
+    # EEG grand average
+    fig.add_trace(go.Table(
+                        header=dict(
+                                values=EEG_ga.columns[:], font=dict(size=10)),
+                        cells=dict(
+                            values=[EEG_ga[i].values.tolist() for i in EEG_ga.columns[:]],
+                            align="left")
+                        ),
+                        row=2, col=1)    
+    
+    # Semiology grand average
+    fig.add_trace(go.Table(
+                        header=dict(
+                                values=semio_ga.columns[:], font=dict(size=10)),
+                        cells=dict(
+                            values=[semio_ga[i].values.tolist() for i in semio_ga.columns[:]],
+                            align="left")
+                        ),
+                        row=3, col=1)    
+
+    # Testing grand average
+    fig.add_trace(go.Table(
+                        header=dict(
+                                values=test_ga.columns[:], font=dict(size=10)),
+                        cells=dict(
+                            values=[test_ga[i].values.tolist() for i in test_ga.columns[:]],
+                            align="left")
+                        ),
+                        row=4, col=1)    
+
+    fig.update_layout(title="All data grand average", yaxis_title="")
+    fig.update_layout(width=1250, height=2400)
+    return fig
