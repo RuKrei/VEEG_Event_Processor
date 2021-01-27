@@ -502,3 +502,42 @@ def plot_interactive_tables(ga_h=None, EEG_ga=None, semio_ga=None, test_ga=None)
     fig.update_layout(title="All data grand average", yaxis_title="")
     fig.update_layout(width=1250, height=2400)
     return fig
+
+
+def plot_interactive_eeg_and_semio(eeg=None, semio=None, source=None):
+    fig = make_subplots(rows=1, cols=2, start_cell="top-left",
+                        subplot_titles=("EEG events", "Semiology events"),
+                        #row_width=[0.1, 0.1, 0.1],
+                        horizontal_spacing=0.2
+                        )
+    # EEG
+    fig.add_trace(go.Histogram(y=eeg["description"], 
+                        histfunc="count",
+                        orientation="h",
+                        name="EEG"),
+                    row=1, col=1
+                    )
+
+    # Semio
+    fig.add_trace(go.Histogram(y=semio["description"], 
+                        histfunc="count",
+                        orientation="h",
+                        name="Semiology"),
+                    row=1, col=2
+                    )    
+
+
+    fig.update_yaxes(categoryorder="total descending")
+    fig.update_layout(width=1100, height=800, title=source)
+    return fig
+
+
+def plot_interactive_eventcount(df=None, mode=None, source=None):
+    fig = go.Figure(
+        data=[go.Histogram(y=df["description"], 
+                            histfunc="count",
+                            orientation="h")]
+                    )
+    fig.update_yaxes(categoryorder="total descending")
+    fig.update_layout(title=(source + " - " + mode + " - Eventcount"))
+    return fig
