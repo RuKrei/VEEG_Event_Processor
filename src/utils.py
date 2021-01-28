@@ -541,3 +541,28 @@ def plot_interactive_eventcount(df=None, mode=None, source=None):
     fig.update_yaxes(categoryorder="total descending")
     fig.update_layout(title=(source + " - " + mode + " - Eventcount"))
     return fig
+
+
+def plot_interactive_testing_results(t_events=None, title="Testing results"):
+    t_events_failed = t_events[t_events["description"].apply(lambda x: x.endswith("0"))]
+    t_events_failed["description"] = t_events_failed.description.str.split("0").str[0]
+    t_events_passed = t_events[t_events["description"].apply(lambda x: x.endswith("1"))]
+    t_events_passed["description"] = t_events_passed.description.str.split("1").str[0]
+    fig = go.Figure()
+
+    # passed
+    fig.add_trace(go.Scatter(x=t_events_passed["time_from_onset"], 
+                        y=t_events_passed["description"],
+                        name="passed",
+                        mode="markers")
+                    )
+
+    # failed
+    fig.add_trace(go.Scatter(x=t_events_failed["time_from_onset"], 
+                        y=t_events_failed["description"],
+                        name="failed",
+                        mode="markers")
+                    )  
+
+    fig.update_layout(width=1100, height=800, title=title)
+    return fig
