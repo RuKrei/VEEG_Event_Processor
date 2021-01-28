@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# data folder
+data/
+data_to_draw_from/
+
+# EEG-Files
+.edf
+
+# htmls
+.html
+
+# results folder
+results/
