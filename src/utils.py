@@ -11,6 +11,7 @@ import seaborn as sns
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly.express as px
 
 
 def get_parent_dir(d):
@@ -213,24 +214,30 @@ def plot_seizure_vertical(df=None, eeg=None, semio=None, testing=None,
 
 def raw_to_df(raw, edf=None):
     df = pd.DataFrame(raw.annotations)
-    to_drop = ["duration"]
-    df = df.drop(to_drop, axis=1)
-    if "Beginn" in str(df["description"]):
-        samp_beginn = df[df["description"].str.contains("Beginn")]["onset"]
-        print("samp_beginn = ", samp_beginn)
-        onset = samp_beginn.astype(int)
-        if isinstance(samp_beginn, pd.core.series.Series):
-            print(f"There are multiple markers for seizure onset in this file --> taking first one.")
-            samp_beginn = samp_beginn.iloc[0].astype(int)
-            onset = samp_beginn
-    else:
+    df = df.drop(["duration"], axis=1)
+    df = df.drop(["orig_time"], axis=1)
+
+    # Find/set Beginn-Marker:
+    e_beginning = df[['e-beginn' in x for x in df['description'].str.lower()]]
+    s_beginning = df[['s-beginn' in x for x in df['description'].str.lower()]]
+    the_beginning = pd.concat([e_beginning, s_beginning], axis=0)
+    if the_beginning.empty:
         print("Error: No marker containing \"Beginn\" found, cannot determine seizure onset for file: ", edf)
         print("Setting seizure onset to the beginning of the file")
-        samp_beginn = int(0)
         onset = "No seizure onset was marked"
-    df["time_from_onset"] = df["onset"] - float(samp_beginn)
-    df = df.drop(["orig_time"], axis=1)
-    df["source"] = edf.split("/")[-1]
+        df.loc[-1] = [0, "_Beginn_(assumed)_"]
+        df.index = df.index + 1
+        df = df.sort_index()
+        the_beginning.loc[1,:] = [0, "_Beginn-(assumed)_"]  
+    samp_beginn = the_beginning.iloc[0,0].astype(float)
+    onset = samp_beginn.astype(float)
+    time_from_onset = df["onset"]
+    time_from_onset = time_from_onset  - samp_beginn
+    df["time_from_onset"] = time_from_onset
+    df = df.drop(["onset"], axis = 1)
+    
+    # Add source column to the left
+    df["source"] = edf.split("/")[-1].split(".edf")[0]      # needs to be changed for windows still
     cols = list(df)
     cols.insert(0, cols.pop(cols.index('source')))
     df = df.loc[:, cols]
@@ -249,7 +256,7 @@ def extract_groups(df, edf=None):
     t_events["source"] = edf
     return e_events, s_events, t_events
 
-
+"""
 def extract_ordered_groups(df=None, source=None):
     df = df.drop_duplicates(subset=["description"], keep="first")
     e_events = df[df["description"].str.startswith("e-")]
@@ -271,6 +278,31 @@ def extract_ordered_groups(df=None, source=None):
     cols = list(t_events)
     cols.insert(0, cols.pop(cols.index('source')))
     t_events = t_events.loc[:, cols]
+    return e_events, s_events, t_events
+"""
+
+
+def extract_ordered_groups(df=None, source=None): # source needed?
+    #df = df.drop_duplicates(subset=["description"], keep="first")   # not doing this, as e- and s- events might reuccur!
+    e_events = df[df["description"].str.startswith("e-")]
+    e_events["order_of_occurence"] = (np.arange(len(e_events.axes[0])) +1).astype(int)
+    #e_events["source"] = source                                       # adapt input for windows! 
+    #cols = list(e_events)
+    #cols.insert(0, cols.pop(cols.index('source')))
+    #e_events = e_events.loc[:, cols]
+    s_events = df[df["description"].str.startswith("s-")]
+    s_events["order_of_occurence"] = (np.arange(len(s_events.axes[0])) +1).astype(int)
+    #s_events["source"] = source
+    #cols = list(s_events)
+    #cols.insert(0, cols.pop(cols.index('source')))
+    #s_events = s_events.loc[:, cols]
+    t_events = df[~df["description"].str.startswith("s-")]
+    t_events = t_events[~df["description"].str.startswith("e-")]
+    t_events["order_of_occurence"] = (np.arange(len(t_events.axes[0])) +1).astype(int)
+    #t_events["source"] = source
+    #cols = list(t_events)
+    #cols.insert(0, cols.pop(cols.index('source')))
+    #t_events = t_events.loc[:, cols]
     return e_events, s_events, t_events
 
 
@@ -339,10 +371,33 @@ def create_results_folders(edfs=None):
             os.makedirs(d, exist_ok=True)
 
 
+def win_create_results_folders(edfs=None):
+    for e in edfs:
+        name = e.split("\\")[-1].split(".")[0]
+        directory = "..\\results\\" + name
+        viz = directory + "\\viz"
+        tables = directory + "\\tables"
+        for d in [directory, viz, tables]:
+            if not os.path.exists(d):
+                os.makedirs(d, exist_ok=True)
+        if len(edfs) > 1:
+            d = ("..\\results\\grand_average\\tables")
+            os.makedirs(d, exist_ok=True)
+            d = ("..\\results\\grand_average\\viz")
+            os.makedirs(d, exist_ok=True)
+
+
 def save_fig_to_disc(fig=None, source=None, name=None):
     source = source.split("/")[-1].split(".")[0]
     name = name + ".png"
     save_path = ("../results/" + source + "/viz/" + name)
+    fig.savefig(save_path)
+
+
+def win_save_fig_to_disc(fig=None, source=None, name=None):
+    source = source.split("\\")[-1].split(".")[0]
+    name = name + ".png"
+    save_path = ("..\\results\\" + source + "\\viz\\" + name)
     fig.savefig(save_path)
 
 
@@ -566,3 +621,18 @@ def plot_interactive_testing_results(t_events=None, title="Testing results"):
 
     fig.update_layout(width=1100, height=800, title=title)
     return fig
+
+
+def plot_interactive_EEG_results(e_events=None, title="EEG results"):
+    fig = px.scatter(e_events, y=e_events["description"], x=e_events["time_from_onset"],
+                        color=e_events["source"])
+    fig.update_layout(width=1100, height=800, title=title)
+    return fig
+
+
+def plot_interactive_semio_results(s_events=None, title="Semiology results"):
+    fig = px.scatter(s_events, y=s_events["description"], x=s_events["time_from_onset"],
+                        color=s_events["source"])
+    fig.update_layout(width=1100, height=800, title=title)
+    return fig
+
