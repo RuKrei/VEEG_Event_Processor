@@ -3,8 +3,6 @@
 # License: BSD (3-clause)
 
 import os
-import glob
-import mne
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -22,194 +20,6 @@ def extract_lab_sec(df):
     times = df["time_from_onset"]
     labels = df["description"]
     return times, labels
-
-
-def loc_of_sep_lines(df, width=10):
-    first = df["time_from_onset"].values[0]
-    last = df["time_from_onset"].values[-1]
-    lines = list()
-    x = 0
-    while x > first:
-        lines.append(x)
-        x -= width
-    x = width
-    while x < last:
-        lines.append(x)
-        x += width
-    return lines
-
-
-def plot_seizure_horizontal(df=None, eeg=None, semio=None, tmin= 0, 
-                                tmax=0, testing=None, source=None, name=None,
-                                graph_sep_line_width=None):
-    sep_lines = loc_of_sep_lines(df, graph_sep_line_width)
-    fig, ax = plt.subplots(figsize=(15,12), sharex=True)
-    plt.suptitle(str(source) + " - " + name)
-    if tmax == 0 and tmin == 0:
-        x_axis = df["time_from_onset"]
-    if tmax != 0 or tmin !=0:
-        x_axis = np.linspace(tmin,tmax, (tmax - tmin))
-    y_axis = np.ones_like(x_axis)
-    ax.set_yticks([])
-    ax.set_axis_off()
-    #eeg
-    ax1 = fig.add_subplot(3, 1, 1)
-    ax1.set_title("EEG Events")
-    ax1.set_yticks([])
-    times, labels = extract_lab_sec(eeg)
-    ax1.plot(0.1,0.1)
-    ax1.plot(0.1,1.9)
-    ax1.plot(x_axis, y_axis)
-    sns.scatterplot(x=times, y=1, ax=ax1)
-    for idx in range(len(times)):
-        label = (str(labels.iloc[idx]))
-        coords = ((times.iloc[idx]), 1)
-        if tmax == 0:
-            xx = np.linspace(x_axis.iloc[0], (x_axis.iloc[-1]*0.9), len(times))
-        if tmax != 0 or tmin !=0:
-            xx = np.linspace(x_axis[0], (x_axis[-1]*0.9), len(times))
-        yy = 1.5 #np.linspace(1.05, 0.8, len(times))  
-        xytext = (xx[idx], yy)
-        ax1.annotate(label, coords, xytext=xytext, color="k",
-                        arrowprops=dict(facecolor='k', 
-                                        arrowstyle='-'))
-    if tmin < 0 < tmax:
-        plt.axvline(x=0, color="r") 
-    for l in sep_lines:
-        plt.axvline(x=l, color="lightblue", ls=":")
-    #semio
-    ax2 = fig.add_subplot(3,1,2)
-    ax2.set_title("Semiology")
-    ax2.set_yticks([])
-    times, labels = extract_lab_sec(semio)
-    ax2.plot(0.1,0.1)
-    ax2.plot(0.1,1.9)
-    ax2.plot(x_axis, y_axis)
-    sns.scatterplot(x=times, y=1, ax=ax2)
-    for idx in range(len(times)):
-        label = (str(labels.iloc[idx]))
-        coords = ((times.iloc[idx]), 1)
-        if tmax == 0:
-            xx = np.linspace(x_axis.iloc[0], (x_axis.iloc[-1]*0.9), len(times))
-        if tmax != 0 or tmin !=0:
-            xx = np.linspace(x_axis[0], (x_axis[-1]*0.9), len(times))
-        yy = 1.5 #np.linspace(1.05, 0.8, len(times))  
-        xytext = (xx[idx], yy)
-        ax2.annotate(label, coords, xytext=xytext, color="k",
-                        arrowprops=dict(facecolor='k', 
-                                        arrowstyle='-'))
-    if tmin < 0 < tmax:
-        plt.axvline(x=0, color="r")
-    for l in sep_lines:
-        plt.axvline(x=l, color="lightblue", ls=":")
-    #testing
-    ax3 = fig.add_subplot(3,1,3)
-    ax3.set_title("Testing")
-    ax3.set_yticks([])
-    times, labels = extract_lab_sec(testing)
-    ax3.plot(0.1,0.1)
-    ax3.plot(0.1,1.9)
-    ax3.plot(x_axis, y_axis)
-    sns.scatterplot(x=times, y=1, ax=ax3)
-    for idx in range(len(times)):
-        label = (str(labels.iloc[idx]))
-        coords = ((times.iloc[idx]), 1)
-        if tmax == 0:
-            xx = np.linspace(x_axis.iloc[0], (x_axis.iloc[-1]*0.9), len(times))
-        if tmax != 0 or tmin !=0:
-            xx = np.linspace(x_axis[0], (x_axis[-1]*0.9), len(times))
-        yy = [1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7,
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 
-                1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7, 1.9, 1.7, 1.5, 1.3, 0.1, 0.3, 0.5, 0.7] 
-        xytext = (xx[idx], yy[idx])
-        ax3.annotate(label, coords, xytext=xytext, color="k",
-                        arrowprops=dict(facecolor='k', 
-                                        arrowstyle='-'))
-    if tmin < 0 < tmax:
-        plt.axvline(x=0, color="r")
-    for l in sep_lines:
-        plt.axvline(x=l, color="lightblue", ls=":")
-    fig.subplots_adjust(hspace=0.8)
-    return fig
-
-
-def plot_seizure_vertical(df=None, eeg=None, semio=None, testing=None, 
-                            tmin= 0, tmax=0, source=None, name=None,
-                            graph_sep_line_width=None):
-    fig, ax = plt.subplots(figsize=(15,25), sharey=True)
-    plt.suptitle(str(source) + " - " + name)
-        
-    if tmax == 0 and tmin == 0:
-        y_axis = df["time_from_onset"]
-    if tmax != 0 or tmin !=0:
-        y_axis = np.linspace(tmin,tmax,tmax)
-
-    x_axis = np.ones_like(y_axis) + 1
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_axis_off()
-    #eeg
-    ax1 = fig.add_subplot(1, 3, 1)
-    ax1.set_title("EEG Events")
-    times, labels = extract_lab_sec(eeg)
-    ax1.plot(x_axis, y_axis)
-    sns.scatterplot(y=times, x=0.5, ax=ax1)
-    for idx in range(len(times)):
-        label = (str(labels.iloc[idx]))
-        coords = (1, (times.iloc[idx])) 
-        xytext = (0.53, (times.iloc[idx]))
-        ax1.annotate(label, coords, xytext=xytext, color="k")
-    if tmin < 0 < tmax:
-        plt.axhline(y=0, color="r", ls="-")
-    ax1.set_xticks([])
-    sep_lines = loc_of_sep_lines(df, graph_sep_line_width)
-    for l in sep_lines:
-        plt.axhline(y=l, color="lightblue", ls=":")
-    #semio
-    ax2 = fig.add_subplot(1,3,2)
-    ax2.set_title("Semiology")
-    ax2.set_xticks([])
-    #ax2.set_yticks([])
-    times, labels = extract_lab_sec(semio)
-    ax2.plot(x_axis, y_axis)
-    sns.scatterplot(y=times, x=0.5, ax=ax2)
-    for idx in range(len(times)):
-        label = (str(labels.iloc[idx]))
-        coords = (1, (times.iloc[idx]))
-        xytext = (0.53, (times.iloc[idx]))
-        ax2.annotate(label, coords, xytext=xytext, color="k")
-    
-    if tmin < 0 < tmax:
-        plt.axhline(y=0, color="r", ls="-")
-    sep_lines = loc_of_sep_lines(df, graph_sep_line_width)
-    for l in sep_lines:
-        plt.axhline(y=l, color="lightblue", ls=":")
-    #testing
-    ax3 = fig.add_subplot(1,3,3)
-    ax3.set_title("Testing")
-    ax3.set_xticks([])
-    #ax3.set_yticks([])
-    times, labels = extract_lab_sec(testing)
-    ax3.plot(x_axis, y_axis)
-    sns.scatterplot(y=times, x=0.5, ax=ax3)
-    for idx in range(len(times)):
-        label = (str(labels.iloc[idx]))
-        coords = (1, (times.iloc[idx]))
-        xytext = (0.53, (times.iloc[idx]))
-        ax3.annotate(label, coords, xytext=xytext, color="k")
-    if tmin < 0 < tmax:
-        plt.axhline(y=0, color="r", ls="-")
-    sep_lines = loc_of_sep_lines(df, graph_sep_line_width)
-    for l in sep_lines:
-        plt.axhline(y=l, color="lightblue", ls=":")
-    fig.subplots_adjust(hspace=0.2)
-    return fig
 
 
 def raw_to_df(raw, edf=None):
@@ -244,65 +54,15 @@ def raw_to_df(raw, edf=None):
     return df, onset
 
 
-def extract_groups(df, edf=None):
-    e_events = df[df["description"].str.startswith("e-")]
-    e_events["source"] = edf
-    s_events = df[df["description"].str.startswith("s-")]
-    s_events["source"] = edf
-    # All other flags should be testing or ignored, so:
-    t_events = df[~df["description"].str.startswith("s-")]
-    t_events = t_events[~t_events["description"].str.startswith("e-")]
-    t_events = t_events[~t_events["description"].str.startswith("i-")]
-    t_events["source"] = edf
-    return e_events, s_events, t_events
-
-"""
-def extract_ordered_groups(df=None, source=None):
-    df = df.drop_duplicates(subset=["description"], keep="first")
-    e_events = df[df["description"].str.startswith("e-")]
-    e_events["order_of_occurence"] = (np.arange(len(e_events.axes[0])) +1).astype(int)
-    e_events["source"] = source.split("/")[-1]
-    cols = list(e_events)
-    cols.insert(0, cols.pop(cols.index('source')))
-    e_events = e_events.loc[:, cols]
-    s_events = df[df["description"].str.startswith("s-")]
-    s_events["order_of_occurence"] = (np.arange(len(s_events.axes[0])) +1).astype(int)
-    s_events["source"] = source.split("/")[-1]
-    cols = list(s_events)
-    cols.insert(0, cols.pop(cols.index('source')))
-    s_events = s_events.loc[:, cols]
-    t_events = df[~df["description"].str.startswith("s-")]
-    t_events = t_events[~df["description"].str.startswith("e-")]
-    t_events["order_of_occurence"] = (np.arange(len(t_events.axes[0])) +1).astype(int)
-    t_events["source"] = source.split("/")[-1]
-    cols = list(t_events)
-    cols.insert(0, cols.pop(cols.index('source')))
-    t_events = t_events.loc[:, cols]
-    return e_events, s_events, t_events
-"""
-
-
-def extract_ordered_groups(df=None, source=None): # source needed?
+def extract_ordered_groups(df=None):
     #df = df.drop_duplicates(subset=["description"], keep="first")   # not doing this, as e- and s- events might reuccur!
     e_events = df[df["description"].str.startswith("e-")]
     e_events["order_of_occurence"] = (np.arange(len(e_events.axes[0])) +1).astype(int)
-    #e_events["source"] = source                                       # adapt input for windows! 
-    #cols = list(e_events)
-    #cols.insert(0, cols.pop(cols.index('source')))
-    #e_events = e_events.loc[:, cols]
     s_events = df[df["description"].str.startswith("s-")]
     s_events["order_of_occurence"] = (np.arange(len(s_events.axes[0])) +1).astype(int)
-    #s_events["source"] = source
-    #cols = list(s_events)
-    #cols.insert(0, cols.pop(cols.index('source')))
-    #s_events = s_events.loc[:, cols]
     t_events = df[~df["description"].str.startswith("s-")]
     t_events = t_events[~df["description"].str.startswith("e-")]
     t_events["order_of_occurence"] = (np.arange(len(t_events.axes[0])) +1).astype(int)
-    #t_events["source"] = source
-    #cols = list(t_events)
-    #cols.insert(0, cols.pop(cols.index('source')))
-    #t_events = t_events.loc[:, cols]
     return e_events, s_events, t_events
 
 
@@ -316,12 +76,6 @@ def make_folders(e):
         os.mkdir(results_dir)
     if not os.path.isdir(res):
         os.mkdir(res)
-
-
-def shrink_df_to_tmax(df=None, tmax=None, tmin=None):
-    shrink_df = df[df["time_from_onset"] < tmax]
-    shrink_df = shrink_df[shrink_df["time_from_onset"] > tmin]
-    return shrink_df
 
 
 def plot_interactive(df=None, eeg=None, semio=None, testing=None, source=None):
@@ -387,20 +141,6 @@ def win_create_results_folders(edfs=None):
             os.makedirs(d, exist_ok=True)
 
 
-def save_fig_to_disc(fig=None, source=None, name=None):
-    source = source.split("/")[-1].split(".")[0]
-    name = name + ".png"
-    save_path = ("../results/" + source + "/viz/" + name)
-    fig.savefig(save_path)
-
-
-def win_save_fig_to_disc(fig=None, source=None, name=None):
-    source = source.split("\\")[-1].split(".")[0]
-    name = name + ".png"
-    save_path = ("..\\results\\" + source + "\\viz\\" + name)
-    fig.savefig(save_path)
-
-
 def plot_interactive_subplot_with_table(df=None, eeg=None, semio=None, testing=None, title=None):
     xaxis_title="Time in seconds (from seizure onset)"
     fig = make_subplots(rows=5, cols=1, shared_xaxes="all", 
@@ -462,37 +202,12 @@ def plot_interactive_subplot_with_table(df=None, eeg=None, semio=None, testing=N
     return fig
 
 
-def plot_eventcounts(df=None, eeg=None, semio=None, source=None):
-    fig, ax = plt.subplots(figsize=(15,26))
-    plt.suptitle(str(source) + " - Event counts")
-    #EEG
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax1.set_title("EEG Events")
-    if len(eeg['description'].value_counts()) > 0:
-        sns.countplot(y="description", data=eeg, orient="h", ax=ax1, order = eeg['description'].value_counts().index)
-    else:
-        #plt.plot(x=1, y=1)
-        ax1.set_title("No EEG events found in file...")
-    #Semiology
-    ax2 = fig.add_subplot(2, 1, 2)
-    ax2.set_title("Semiology Events")
-    if len(semio['description'].value_counts()) > 0:
-        sns.countplot(y="description", data=semio, orient="h", ax=ax2, order = semio['description'].value_counts().index)
-    else:
-        #plt.plot(x=1, y=1)
-        ax2.set_title("No Semiology events found in file...")
-    ax.set_yticks([])
-    ax.set_axis_off()
-    fig.subplots_adjust(hspace=0.2)
-    return fig
-
-
 def save_plotly_to_html(fig=None, source=None):
     save_dir = "../results/" + source + "/viz/"
     save_name = save_dir + source + "_interactive_viz.html"
     fig.write_html(save_name)
 
-
+"""
 def extract_parameters_from_raw(raw=None):
     highp = raw.info["highpass"]
     lowp = raw.info["lowpass"]
@@ -501,7 +216,7 @@ def extract_parameters_from_raw(raw=None):
     channels = raw.info["ch_names"]
     nr_channels = raw.info["nchan"]
     return highp, lowp, sfreq, aq, channels, nr_channels
-
+"""
 
 def plot_interactive_tables(ga_h=None, EEG_ga=None, semio_ga=None, test_ga=None):
     fig = make_subplots(rows=4, cols=1, 
@@ -583,7 +298,9 @@ def plot_interactive_eeg_and_semio(eeg=None, semio=None, source=None):
 
 
     fig.update_yaxes(categoryorder="total descending")
-    fig.update_layout(width=1100, height=800, title=source)
+    fig.update_layout(width=1100, height=800, title=source,
+                        xaxis_title="Number of occurences",
+                        yaxis_title="")
     return fig
 
 
@@ -594,7 +311,9 @@ def plot_interactive_eventcount(df=None, mode=None, source=None):
                             orientation="h")]
                     )
     fig.update_yaxes(categoryorder="total descending")
-    fig.update_layout(title=(source + " - " + mode + " - Eventcount"))
+    fig.update_layout(title=(source + " - " + mode + " - Eventcount"),
+                        xaxis_title="Number of occurences",
+                        yaxis_title="")
     return fig
 
 
@@ -619,20 +338,22 @@ def plot_interactive_testing_results(t_events=None, title="Testing results"):
                         mode="markers")
                     )  
 
-    fig.update_layout(width=1100, height=800, title=title)
+    fig.update_layout(width=1100, height=800, title=title,
+                    xaxis_title="Time in seconds from onset",
+                    yaxis_title="")
     return fig
 
 
 def plot_interactive_EEG_results(e_events=None, title="EEG results"):
     fig = px.scatter(e_events, y=e_events["description"], x=e_events["time_from_onset"],
                         color=e_events["source"])
-    fig.update_layout(width=1100, height=800, title=title)
+    fig.update_layout(width=1100, height=800, title=title, xaxis_title="Time in seconds from onset")
     return fig
 
 
 def plot_interactive_semio_results(s_events=None, title="Semiology results"):
     fig = px.scatter(s_events, y=s_events["description"], x=s_events["time_from_onset"],
                         color=s_events["source"])
-    fig.update_layout(width=1100, height=800, title=title)
+    fig.update_layout(width=1100, height=800, title=title, xaxis_title="Time in seconds from onset")
     return fig
 
