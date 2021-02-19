@@ -328,14 +328,16 @@ def plot_interactive_testing_results(t_events=None, title="Testing results"):
     fig.add_trace(go.Scatter(x=t_events_passed["time_from_onset"], 
                         y=t_events_passed["description"],
                         name="passed",
-                        mode="markers")
+                        mode="markers",
+                        hovertext=t_events_passed["source"])
                     )
 
     # failed
     fig.add_trace(go.Scatter(x=t_events_failed["time_from_onset"], 
                         y=t_events_failed["description"],
                         name="failed",
-                        mode="markers")
+                        mode="markers",
+                        hovertext=t_events_passed["source"])
                     )  
 
     fig.update_layout(width=1100, height=800, title=title,
