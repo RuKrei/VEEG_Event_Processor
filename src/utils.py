@@ -3,9 +3,7 @@
 # License: BSD (3-clause)
 
 import os
-import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
