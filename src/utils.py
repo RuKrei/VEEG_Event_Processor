@@ -64,6 +64,86 @@ def extract_ordered_groups(df=None):
     return e_events, s_events, t_events
 
 
+def write_excel_table(e_events=None, s_events=None, win=False):
+    xlsx_file = "All_data_grand_average.xlsx"
+    if win:
+        xlsx_file = "..\\results\\grand_average\\tables\\" + xlsx_file
+    else:
+        xlsx_file = "../results/grand_average/tables/" + xlsx_file
+
+    writer = pd.ExcelWriter (xlsx_file)
+    
+    
+    # EEG-Events
+    i = 1
+    left = ["EEG", "", "File:", "Pattern 1:", "Pattern 2:", "Pattern 3:", "Pattern 4:", 
+                "Pattern 5:", "Pattern 6:", "Pattern 7:",
+                "Pattern 8:", "Pattern 9:", "Pattern 10:", "..."]
+    for e in e_events.keys():
+        try:
+            if e_events[e].empty:
+                print(f"Empty EEG-List --> {e_events[e]}, omitting")
+            else:
+                df_e = pd.DataFrame(e_events[e], columns=["description"])
+                _, file = os.path.split(e)
+                df_e = df_e.rename(columns={"description": file.split(".edf")[0]})
+                df_e.to_excel(writer, sheet_name="EEG", startcol=(i+1), startrow=2, header=True, index=False)
+                i += 1
+            left_df = pd.DataFrame(left)
+            left_df.to_excel(writer, sheet_name="EEG", startcol=0, startrow=0, header=False, index=False)
+        except Exception as e:
+            print(f"Excel-File: Something went wrong trying to parse EEG-Events for {e}")
+
+    # Semiology-Events - list
+    sem_left = ["Semiology", "", "File:", "Pattern 1:", "Pattern 2:", "Pattern 3:", "Pattern 4:", 
+                "Pattern 5:", "Pattern 6:", "Pattern 7:",
+                "Pattern 8:", "Pattern 9:", "Pattern 10:", "..."]
+    i = 1
+    for s in s_events.keys():
+        try:
+            if s_events[s].empty:
+                print(f"Empty Semiology-List --> {s_events[s]}, omitting")
+            else:
+                df_s = pd.DataFrame(s_events[s], columns=["description"])
+                _, file = os.path.split(s)
+                df_s = df_s.rename(columns={"description": file.split(".edf")[0]})
+                df_s.to_excel(writer, sheet_name="Semiology_1", startcol=(i+1), startrow=2, header=True, index=False)
+                #writer.save()
+                i += 1
+            sem_left_df = pd.DataFrame(sem_left)
+            sem_left_df.to_excel(writer, sheet_name="Semiology_1", startcol=0, startrow=0, header=False, index=False)
+        except Exception as e:
+            print(f"Excel-File: Something went wrong trying to parse Semiology-Events for {s}")
+
+    # Semiology events - pattern = index
+    for s in s_events.keys():
+        _, file = os.path.split(s)
+        try:
+            if s_events[s].empty:
+                print(f"Empty Semiology-List --> {s_events[s]}, omitting")
+            else:
+                try:
+                    # merge 2 dataframes
+                    new_df = pd.DataFrame(s_events[s], columns=["description", "order_of_occurence"])
+                    new_df = new_df.rename(columns={"order_of_occurence": file.split(".edf")[0]})
+                    df_s = pd.merge(df_s, new_df, how="outer", on="description", suffixes=(" ", "  "))
+                except Exception as e:
+                    # there is no dataframe to start with, so create one
+                    print(e)
+                    df_s = pd.DataFrame(s_events[s], columns=["description", "order_of_occurence"])
+                    df_s = df_s.rename(columns={"order_of_occurence": file.split(".edf")[0]})
+                
+                # write to file
+                df_s.to_excel(writer, sheet_name="Semiology_2", startcol=1, startrow=3, header=True, index=False)
+            sem_left = ["Semiology", ""]
+            sem_left_df = pd.DataFrame(sem_left)
+            sem_left_df.to_excel(writer, sheet_name="Semiology_2", startcol=0, startrow=0, header=False, index=False)
+            writer.save()
+        except Exception as e:
+            print(f"Excel-File: Something went wrong trying to parse Semiology-Events for {s}:")
+            print(e)
+
+
 def make_folders(e):
     cwd = os.getcwd()
     parent = get_parent_dir(cwd)
