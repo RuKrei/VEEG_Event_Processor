@@ -28,11 +28,12 @@ if os.path.isfile(CONFIG_FILE):
 
 class EdfGrabber:
     """Returns a list of .edf files in ../data/ directory"""
-    def __init__(self, directory) -> None:
+    def __init__(self, directory) -> list:
         self.directory = directory
 
     def grab_edfs(self):
-        dir = os.path.join(self.directory, "*.edf")
+        pwd = os.getcwd()
+        dir = os.path.join(pwd, self.directory, "*.edf")
         return glob.glob(dir)
 
 class EdfToDataFrame:
@@ -70,7 +71,7 @@ class EdfToDataFrame:
             df["source"] = self.edf.split("\\")[-1].split(".edf")[1]
         cols = list(df)
         cols.insert(0, cols.pop(cols.index('source')))
-        return df.loc[:, cols]
+        return df.loc[:, cols], df["source"][0]
         
     def raw_to_df(self):
         raw = self._return_raw()
@@ -78,8 +79,9 @@ class EdfToDataFrame:
         df = df.drop(["duration"], axis=1)
         df = df.drop(["orig_time"], axis=1)
         df, onset = self._set_beginning(df)
-        df = self._add_source_column(df)
-        return df, onset
+        df, source = self._add_source_column(df)
+        print(f"source = {source}")
+        return df, source
 
 
 
@@ -106,8 +108,9 @@ def main():
 
     for e in edfs:
         edf_framer = EdfToDataFrame(e)
-        df_e = edf_framer.raw_to_df()
+        df_e, source = edf_framer.raw_to_df()
         print(df_e)
+        df[source] = df_e
 
 if __name__ == '__main__':
     main()
