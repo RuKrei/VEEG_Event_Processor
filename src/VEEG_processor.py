@@ -23,7 +23,7 @@ from utils import (get_parent_dir, extract_lab_sec, raw_to_df, extract_ordered_g
 
 CONFIG_FILE = os.path.join(os.getcwd(), "VEEG_config.xlsx")
 if os.path.isfile(CONFIG_FILE):
-    print(f"Using configuration file: {CONFIG_FILE}")
+    print("Using configuration file: ", CONFIG_FILE)
 
 
 class EdfGrabber:
@@ -49,7 +49,7 @@ class EdfToDataFrame:
         s_beginning = df[['s-beginn' in x for x in df['description'].str.lower()]]
         the_beginning = pd.concat([e_beginning, s_beginning], axis=0)
         if the_beginning.empty:
-            print("Error: No marker containing \"Beginn\" found, cannot determine seizure onset for file: ", edf)
+            print(f"Error: No marker containing \"Beginn\" found, cannot determine seizure onset for: {df}")
             print("Setting seizure onset to the beginning of the file")
             onset = "No seizure onset was marked"
             df.loc[-1] = [0, "_Beginn_(assumed)_"]
@@ -65,7 +65,9 @@ class EdfToDataFrame:
     
     def _add_source_column(self, df):
         # Add source column to the left
-        df["source"] = self.edf.split("/")[-1].split(".edf")[1]      # needs to be changed for windows still
+        df["source"] = self.edf.split("/")[-1].split(".edf")[1]
+        if df["source"] == None:                                        # we are most likely on a windows os
+            df["source"] = self.edf.split("\\")[-1].split(".edf")[1]
         cols = list(df)
         cols.insert(0, cols.pop(cols.index('source')))
         return df.loc[:, cols]
@@ -92,14 +94,20 @@ class EdfToDataFrame:
 
 
 def main():
-    """Grab the .edf files"""
+    #Grab the .edf files
     Grabber = EdfGrabber(directory="../data")
     edfs = Grabber.grab_edfs()
     print(f"Found the following edfs:\n {edfs}\n\n")
 
-    edf_framer = EdfToDataFrame(edfs[0])
-    df = edf_framer.raw_to_df()
-    print(df)
+    df = dict()             # all data
+    e_events = dict()       # EEG events
+    s_events = dict()       # Semiology events
+    t_events = dict()       # Testing events
+
+    for e in edfs:
+        edf_framer = EdfToDataFrame(e)
+        df_e = edf_framer.raw_to_df()
+        print(df_e)
 
 if __name__ == '__main__':
     main()
