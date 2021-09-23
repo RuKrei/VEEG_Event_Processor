@@ -42,10 +42,7 @@ class Grabber:
         return glob.glob(dir)
     
     def grab_subject_name(self) -> str:
-        if win:
-            return os.getcwd().split("\\")[-2].split("VEEG_Event_Processor-")[-1]
-        else:
-            return os.getcwd().split("/")[-2].split("VEEG_Event_Processor-")[-1]
+        return os.getcwd().split(folder_splitter)[-2].split("VEEG_Event_Processor-")[-1]
         
 
 class EdfToDataFrame:
@@ -78,9 +75,7 @@ class EdfToDataFrame:
     
     def _add_source_column(self, df):
         # Add source column to the left
-        df["source"] = self.edf.split("/")[-1].split(".edf")[1]
-        if df["source"][0] == None:                                        # we are most likely on a windows os
-            df["source"] = self.edf.split("\\")[-1].split(".edf")[1]
+        df["source"] = self.edf.split(folder_splitter)[-1].split(".edf")[1]
         cols = list(df)
         cols.insert(0, cols.pop(cols.index('source')))
         return df.loc[:, cols], df["source"][0]
@@ -121,12 +116,8 @@ def main():
 
 
     #save
-        if win:
-            csv_path = os.path.join("..", "results", e.split("\\")[-1].split(".")[0], "tables")
-            e_file = e.split("\\")[-1].split(".")[0]
-        else:
-            csv_path = os.path.join("..", "results", e.split("/")[-1].split(".")[0], "tables")
-            e_file = e.split("/")[-1].split(".")[0]
+        csv_path = os.path.join("..", "results", e.split(folder_splitter)[-1].split(".")[0], "tables")
+        e_file = e.split(folder_splitter)[-1].split(".")[0]
         tsv_name = "All_data_" + e_file + ".tsv"
         fname = os.path.join(csv_path, tsv_name)
         df[e].to_csv(fname, sep="\t")
@@ -186,19 +177,13 @@ def main():
 
 
     # save grand averages
-    if win:
-        eeg_ga.to_csv("..\\results\\grand_average\\tables\\EEG_data_grand_average.tsv", sep="\t")
-        semio_ga.to_csv("..\\results\\grand_average\\tables\\Semiology_data_grand_average.tsv", sep="\t")
-        test_ga.to_csv("..\\results\\grand_average\\tables\\Testing_data_grand_average.tsv", sep="\t")
-        concat.to_csv("..\\results\\grand_average\\tables\\All_data_grand_average_horizontal.tsv", sep="\t")
-        vconcat.to_csv("..\\results\\grand_average\\tables\\All_data_grand_average.tsv", sep="\t")
-
-    else:
-        eeg_ga.to_csv("../results/grand_average/tables/EEG_data_grand_average.tsv", sep="\t")
-        semio_ga.to_csv("../results/grand_average/tables/Semiology_data_grand_average.tsv", sep="\t")
-        test_ga.to_csv("../results/grand_average/tables/Testing_data_grand_average.tsv", sep="\t")
-        concat.to_csv("../results/grand_average/tables/All_data_grand_average_horizontal.tsv", sep="\t")
-        vconcat.to_csv("../results/grand_average/tables/All_data_grand_average.tsv", sep="\t")
+    base_dir = os.path.join ("..", "results", "grand_average", "tables")
+    eeg_ga.to_csv(os.path.join(base_dir, "EEG_data_grand_average.tsv"), sep="\t")
+    semio_ga.to_csv(os.path.join(base_dir, "Semiology_data_grand_average.tsv"), sep="\t")
+    test_ga.to_csv(os.path.join(base_dir, "Testing_data_grand_average.tsv"), sep="\t")
+    concat.to_csv(os.path.join(base_dir, "All_data_grand_average_horizontal.tsv"), sep="\t")
+    vconcat.to_csv(os.path.join(base_dir, "All_data_grand_average.tsv"), sep="\t")
+    
 
     # write excel file
     write_excel_table(e_events, s_events, win=win) 
@@ -218,14 +203,10 @@ def main():
     interactive_plots = dict()
 
     for e in event_folders:
-        if win:
-            source = e.split("\\")[-1].split(".")[0]
-            sep = "\\"
-        else:
-            source = e.split("/")[-1].split(".")[0]
-            sep = "/"
+        source = e.split(folder_splitter)[-1].split(".")[0]
+        sep = "\\" if win else "/"
+        
         tsv_path = join(e, "tables")
-
         tsv_name = "All_data_" + source + ".tsv"
         tsv = os.path.join(tsv_path, tsv_name)
         data[source] = pd.read_csv(tsv, sep="\t")
@@ -314,10 +295,13 @@ def main():
 
 
 
-
-
-
     # Lazy grand average
+    
+    
+    # to do --> also create a lazy_average DataFrame at the beginning to use 
+    # here for another round of grand average visualization
+    
+    
     # load configuration from excel file:
     mEEG = pd.read_excel("VEEG_config.xlsx", sheet_name="EEG")
     mEEG = mEEG[["mName", "mTranslation", "mSubstitution"]]
