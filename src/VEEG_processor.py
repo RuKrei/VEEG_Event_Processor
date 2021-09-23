@@ -14,6 +14,7 @@ import re
 from mne import Report
 import pandas as pd
 import numpy as np
+import platform
 from utils import (get_parent_dir, extract_lab_sec, raw_to_df, extract_ordered_groups, save_plotly_to_html,
                         create_results_folders, plot_interactive_subplot_with_table,
                         plot_interactive_tables, plot_interactive_eeg_and_semio, plot_interactive_eventcount,
@@ -22,14 +23,15 @@ from utils import (get_parent_dir, extract_lab_sec, raw_to_df, extract_ordered_g
 
 
 # Configuration
-win = False
+win = True if platform.system().lower().startswith("win") else False
+folder_splitter = "\\" if win else "/"
 CONFIG_FILE = os.path.join(os.getcwd(), "VEEG_config.xlsx")
 
 if os.path.isfile(CONFIG_FILE):
     print("Using configuration file: ", CONFIG_FILE)
 
 
-class EdfGrabber:
+class Grabber:
     """Returns a list of .edf files in ../data/ directory"""
     def __init__(self, directory) -> str:
         self.directory = directory
@@ -38,6 +40,13 @@ class EdfGrabber:
         pwd = os.getcwd()
         dir = os.path.join(pwd, self.directory, "*.edf")
         return glob.glob(dir)
+    
+    def grab_subject_name(self) -> str:
+        if win:
+            return os.getcwd().split("\\")[-2].split("VEEG_Event_Processor-")[-1]
+        else:
+            return os.getcwd().split("/")[-2].split("VEEG_Event_Processor-")[-1]
+        
 
 class EdfToDataFrame:
     """Loads an .edf-file, determines seizure onset and saves all markers to a pandas DataFrame"""
@@ -90,17 +99,15 @@ class EdfToDataFrame:
 
 def main():
     #Grab the .edf files
-    Grabber = EdfGrabber(directory="../data")
-    edfs = Grabber.grab_edfs()
+    Grab = Grabber(directory="../data")
+    edfs = Grab.grab_edfs()
+    subj_name = Grab.grab_subject_name()
     if win:
         win_create_results_folders(edfs)
-        subj_name =  os.getcwd().split("\\")[-2].split("VEEG_Event_Processor-")[-1]
     else:
         create_results_folders(edfs)
-        subj_name =  os.getcwd().split("/")[-2].split("VEEG_Event_Processor-")[-1]
     print(f"Subject/ Patient name is: {subj_name}")
     print(f"Found the following edfs:\n {edfs}\n\n")
-
     df = dict()             # all data
     e_events = dict()       # EEG events
     s_events = dict()       # Semiology events
