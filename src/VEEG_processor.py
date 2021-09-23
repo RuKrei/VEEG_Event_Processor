@@ -1,4 +1,3 @@
-#! /usr/bin/python
 # Author: Rudi Kreidenhuber
 # License: BSD (3-clause)
 
@@ -32,10 +31,10 @@ if os.path.isfile(CONFIG_FILE):
 
 class EdfGrabber:
     """Returns a list of .edf files in ../data/ directory"""
-    def __init__(self, directory) -> list:
+    def __init__(self, directory) -> str:
         self.directory = directory
 
-    def grab_edfs(self):
+    def grab_edfs(self) -> list:
         pwd = os.getcwd()
         dir = os.path.join(pwd, self.directory, "*.edf")
         return glob.glob(dir)
