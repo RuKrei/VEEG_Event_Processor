@@ -163,19 +163,10 @@ class EdfToDataFrame:
                             print(f"mEEG.loc[str(r)][1] --> {mEEG.loc[str(r)][1]}")
                             # split the substitution
                             subst = str(mEEG.loc[str(r)][1]).split("-")
-
-
-                            #print(f"\n\nsubst = {subst} \n\n")
-
-
                             for s in subst:
                                 if not s in rex:
                                     newitems.append(s)
                             for n in newitems:
-                            #    if n == "" or n in rex or n in newitems:
-                            #        pass
-                            #    else:
-                            #        rex.append(str("-" + n))
                                 rex.append(str("-" + n))    
                             # delete r, as it has just been substituted
                             rex.remove(str("-" + r))
@@ -188,7 +179,7 @@ class EdfToDataFrame:
                 if r in mAnatomy.index:
                     pass
         print(f"rex after substitution   -->   {rex}")      
-        #print(f"rex without base: {rex}")
+
      #   define placeholder lists
         strEEG = []
         strSemio = []
@@ -243,30 +234,8 @@ class EdfToDataFrame:
         df = df.drop(["orig_time"], axis=1)
         df, onset = self._set_beginning(df)
         df, source = self._add_source_column(df)
-#        for idx, val in enumerate(df["description"]):
-#            df["description"][idx] = self._marker_to_text(val)
-        print(f"source = {source}")
         return df, onset
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+ 
     def translate_markers(self, df):
         """Takes a DataFrame as produced by raw_to_df and 
            changes Markers in Column description to human readable form.
@@ -483,38 +452,17 @@ def main():
 
 
 
-    # Lazy grand average
+    # Lazy grand average   
+    lazy_df = data["grand_average"].copy()
+    for idx, val in enumerate(lazy_df["description"]):
+        lazy_df["description"][idx] = edf_framer._marker_to_text(val)
+    #for val in  lazy_df[e]["description"]:
+    #lazy_df[e]["description"] = lazy_df[e]["description"].apply(edf_framer._marker_to_text())
+    print(lazy_df["description"])
+
+
     
-    
-    # to do --> also create a lazy_average DataFrame at the beginning to use 
-    # here for another round of grand average visualization
-    
-    
-    # load configuration from excel file:
-
-
-"""
-    testTags = ["e-BIRD-r-temp-ffluct",
-                "e-ASD-FZ",
-                "e-sw-FZ",
-                "e-maf-l-par",
-                "e-LPD+F-F7",
-                "e-RDA-FZ-CZ",
-                "e-oirda-l-temp-F7"]  #!!! --> left left temporal temporal
-
-    for t in testTags:
-        plain_text = list()
-        trans = marker_to_text(t, substitute=True)
-        trans = trans.split(" ")
-        for t in trans:
-            if t not in plain_text and not t == "":
-                plain_text.append(t)
-        plain_text = " ".join(plain_text)
-        print(f"--> {plain_text}\n")
-"""
-
-
-
+    # to do --> do the visualiszation for lazy_grand average again or better refactor, so that there is no code duplication
 
 
 
