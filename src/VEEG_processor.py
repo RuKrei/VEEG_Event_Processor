@@ -26,9 +26,13 @@ from utils import (get_parent_dir, extract_lab_sec, raw_to_df, extract_ordered_g
 win = True if platform.system().lower().startswith("win") else False
 folder_splitter = "\\" if win else "/"
 CONFIG_FILE = os.path.join(os.getcwd(), "VEEG_config.xlsx")
+if not os.path.isfile(CONFIG_FILE):
+    CONFIG_FILE = os.path.join(os.getcwd(), "src/VEEG_config.xlsx")
+print("Using configuration file: ", CONFIG_FILE)
 
-if os.path.isfile(CONFIG_FILE):
-    print("Using configuration file: ", CONFIG_FILE)
+if not os.getcwd().endswith("src"):
+    os.chdir("./src")
+    print(f"Changed working directory to {os.getcwd()}")
 
 
 class Grabber:
@@ -75,11 +79,163 @@ class EdfToDataFrame:
     
     def _add_source_column(self, df):
         # Add source column to the left
-        df["source"] = self.edf.split(folder_splitter)[-1].split(".edf")[1]
+        df["source"] = self.edf.split(folder_splitter)[-1].split(".edf")[0]
         cols = list(df)
         cols.insert(0, cols.pop(cols.index('source')))
         return df.loc[:, cols], df["source"][0]
-        
+    
+    def _read_config_file(self, config=CONFIG_FILE):
+        mEEG = pd.read_excel(CONFIG_FILE, sheet_name="EEG")
+        mEEG = mEEG[["mName", "mTranslation", "mSubstitution"]]
+        mEEG.dropna(how="all", inplace=True)
+        mEEG = mEEG.set_index("mName")
+
+        mSemio = pd.read_excel(CONFIG_FILE, sheet_name="Semio")
+        mSemio = mSemio[["mName", "mTranslation", "mSubstitution"]]
+        mSemio.dropna(how="all", inplace=True)
+        mSemio = mSemio.set_index("mName")
+
+        mModifiers = pd.read_excel(CONFIG_FILE, sheet_name="Modifiers")
+        mModifiers = mModifiers[["mName", "mTranslation", "mSubstitution"]]
+        mModifiers.dropna(how="all", inplace=True)
+        mModifiers = mModifiers.set_index("mName")
+
+        mAnatomy = pd.read_excel(CONFIG_FILE, sheet_name="Anatomy")
+        mAnatomy = mAnatomy[["mName", "mTranslation", "mSubstitution"]]
+        mAnatomy.dropna(how="all", inplace=True)
+        mAnatomy = mAnatomy.set_index("mName")
+
+        return(mEEG, mSemio, mModifiers, mAnatomy)
+
+    def _marker_to_text(self, string, substitute=True):
+        """
+        Splits the input string as needed
+        Translates according to CONFIG_FILE
+        returns:
+          a string in human readable format
+          type: EEG, Semio, Testing
+          markers_code: e-"IAmTheBaseName"
+        """
+        mEEG, mSemio, mModifiers, mAnatomy = self._read_config_file()
+        d = dict()
+        readbable = str()
+        # ignore the i- markers - not need to translate those
+        if string.startswith("i-"):
+            return "ignored"
+        # the rest belongs to one of three groups
+        elif string.startswith("e-"):
+            d["type"] = "EEG"
+        elif string.startswith("s-"):
+            d["type"] = "Semiology"
+        else:
+            d["type"] = "Testing"
+    
+        # this returns a list of markers and modifiers
+        rex = re.findall(r"[-|+]\w*", string)
+
+        # First job is to define the base 
+        try:
+            # base comes first
+            r = rex[0].strip("-")
+            rr = rex[0]
+            if r in mEEG.index:
+                base = mEEG.loc[str(r)][0]
+            else:
+                base = str(r)
+            # now we can drop it from the list
+            rex.remove(rr)
+
+        # This might not be a smart move :-(
+        except Exception as e:
+            print(f"Could not determine base: {e}, setting it to {string}")
+            base = string
+    
+    
+        # 2nd job: substitutions
+        if substitute == True:
+            for r in rex:
+                #print(f"\n\nrex = {rex} \n\n")
+                r = r.split("-")[-1].split("+")[-1] 
+                if r in mEEG.index:
+                    if mEEG.loc[str(r)][1] != None:
+                        newitems = list()
+                        try:
+                            print(f"mEEG.loc[str(r)][1] --> {mEEG.loc[str(r)][1]}")
+                            # split the substitution
+                            subst = str(mEEG.loc[str(r)][1]).split("-")
+
+
+                            #print(f"\n\nsubst = {subst} \n\n")
+
+
+                            for s in subst:
+                                if not s in rex:
+                                    newitems.append(s)
+                            for n in newitems:
+                            #    if n == "" or n in rex or n in newitems:
+                            #        pass
+                            #    else:
+                            #        rex.append(str("-" + n))
+                                rex.append(str("-" + n))    
+                            # delete r, as it has just been substituted
+                            rex.remove(str("-" + r))
+                        except Exception as e:
+                            print(e)
+                if r in mSemio.index:
+                    pass
+                if r in mModifiers.index:
+                    pass
+                if r in mAnatomy.index:
+                    pass
+        print(f"rex after substitution   -->   {rex}")      
+        #print(f"rex without base: {rex}")
+     #   define placeholder lists
+        strEEG = []
+        strSemio = []
+        strAna = []
+        strMod = []
+        strNotRecognized = []
+    
+        # now we can go throug the modifiers etc.
+        for r in rex:
+            r = r.split("-")[-1] 
+            r = r.split("+")[-1]
+            r = r.strip("-")     
+            if r in mEEG.index:
+                strEEG.append(mEEG.loc[str(r)][0])
+            elif r in mSemio.index:
+                strSemio.append(mSemio.loc[str(r)][0])
+            elif str("+" + r) in mModifiers.index:
+                strMod.append(str(mModifiers.loc[str("+" + r)][0]))
+            elif str(r) in mModifiers.index:
+                strMod.append(str("with " + mModifiers.loc[str(r)][0]))
+            elif r in mAnatomy.index:
+                strAna.append(mAnatomy.loc[str(r)][0])
+            else:
+                strNotRecognized.append(r)
+
+        # make sure output order is always the same + return 
+        readable = ""
+        if strEEG is not []:
+            #strEEG = set(strEEG)
+            for e in sorted(strEEG):
+                readable += str(" " + e)
+        if strSemio is not []:
+            for m in sorted(strSemio):
+                readable += str(" " + m)
+        if strMod is not []:
+            for m in sorted(strMod):
+                readable += str(" " + m)
+        if strAna is not []:
+            for a in sorted(strAna):
+                readable += str(" " + a)     
+        if strNotRecognized is not []:
+            for m in sorted(strNotRecognized):
+                readable += str(" " + m)
+
+        readable = base + " " + readable
+        return readable
+    
     def raw_to_df(self):
         raw = self._return_raw()
         df = pd.DataFrame(raw.annotations)
@@ -87,8 +243,39 @@ class EdfToDataFrame:
         df = df.drop(["orig_time"], axis=1)
         df, onset = self._set_beginning(df)
         df, source = self._add_source_column(df)
+#        for idx, val in enumerate(df["description"]):
+#            df["description"][idx] = self._marker_to_text(val)
         print(f"source = {source}")
         return df, onset
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    def translate_markers(self, df):
+        """Takes a DataFrame as produced by raw_to_df and 
+           changes Markers in Column description to human readable form.
+
+        Args:
+            df ([pandas.DataFrame]): Output of EdfToDataFrame.raw_to_df
+        """
+
+        pass
 
 
 
@@ -277,6 +464,7 @@ def main():
     ga_report.add_htmls_to_section(event_counts.to_html(full_html=False), section=sec, captions=cap)
     # EEG
     cap = source + " VIZ --> All EEG results"
+    print(EEG["grand_average"])
     eeg_viz = plot_interactive_EEG_results(e_events=EEG["grand_average"], title=cap)
     ga_report.add_htmls_to_section(eeg_viz.to_html(full_html=False), section=sec, captions=cap)
     # Semiology
@@ -303,154 +491,9 @@ def main():
     
     
     # load configuration from excel file:
-    mEEG = pd.read_excel("VEEG_config.xlsx", sheet_name="EEG")
-    mEEG = mEEG[["mName", "mTranslation", "mSubstitution"]]
-    mEEG.dropna(how="all", inplace=True)
-    mEEG = mEEG.set_index("mName")
-    print(mEEG)
-
-    mSemio = pd.read_excel("VEEG_config.xlsx", sheet_name="Semio")
-    mSemio = mSemio[["mName", "mTranslation", "mSubstitution"]]
-    mSemio.dropna(how="all", inplace=True)
-    mSemio = mSemio.set_index("mName")
-
-    mModifiers = pd.read_excel("VEEG_config.xlsx", sheet_name="Modifiers")
-    mModifiers = mModifiers[["mName", "mTranslation", "mSubstitution"]]
-    mModifiers.dropna(how="all", inplace=True)
-    mModifiers = mModifiers.set_index("mName")
-
-    mAnatomy = pd.read_excel("VEEG_config.xlsx", sheet_name="Anatomy")
-    mAnatomy = mAnatomy[["mName", "mTranslation", "mSubstitution"]]
-    mAnatomy.dropna(how="all", inplace=True)
-    mAnatomy = mAnatomy.set_index("mName")
 
 
-    def marker_to_text(string=None, substitute=False):
-        """
-        Splits the input string as needed
-
-        returns:
-          a string in human readable format
-          type: EEG, Semio, Testing
-          markers_code: e-"IAmTheBaseName"
-        """
-    
-        d = dict()
-        readbable = str()
-        # ignore the i- markers - not need to translate those
-        if string.startswith("i-"):
-            return ""
-        # the rest belongs to one of three groups
-        elif string.startswith("e-"):
-            d["type"] = "EEG"
-        elif string.startswith("s-"):
-            d["type"] = "Semiology"
-        else:
-            d["type"] = "Testing"
-    
-        # this returns a list of markers and modifiers
-        rex = re.findall(r"[-|+]\w*", string)
-
-        # First job is to define the base 
-        try:
-            # base comes first
-            r = rex[0].strip("-")
-            rr = rex[0]
-            if r in mEEG.index:
-                base = mEEG.loc[str(r)][0]
-            else:
-                base = str(r)
-            # now we can drop it from the list
-            rex.remove(rr)
-        except Exception as e:
-            print(f"Could not determine base: {e}")
-    
-    
-        # 2nd job: substitutions
-        if substitute == True:
-            for r in rex:
-                #print(f"\n\nrex = {rex} \n\n")
-                r = r.split("-")[-1].split("+")[-1] 
-                if r in mEEG.index:
-                    if mEEG.loc[str(r)][1] != None:
-                        newitems = list()
-                        try:
-                            print(f"mEEG.loc[str(r)][1] --> {mEEG.loc[str(r)][1]}")
-                            # split the substitution
-                            subst = str(mEEG.loc[str(r)][1]).split("-")
-
-
-                            #print(f"\n\nsubst = {subst} \n\n")
-
-
-                            for s in subst:
-                                if not s in rex:
-                                    newitems.append(s)
-                            for n in newitems:
-                            #    if n == "" or n in rex or n in newitems:
-                            #        pass
-                            #    else:
-                            #        rex.append(str("-" + n))
-                                rex.append(str("-" + n))    
-                            # delete r, as it has just been substituted
-                            rex.remove(str("-" + r))
-                        except Exception as e:
-                            print(e)
-                if r in mSemio.index:
-                    pass
-                if r in mModifiers.index:
-                    pass
-                if r in mAnatomy.index:
-                    pass
-        print(f"rex after substitution   -->   {rex}")      
-        #print(f"rex without base: {rex}")
-     #   define placeholder lists
-        strEEG = []
-        strSemio = []
-        strAna = []
-        strMod = []
-        strNotRecognized = []
-    
-        # now we can go throug the modifiers etc.
-        for r in rex:
-            r = r.split("-")[-1] 
-            r = r.split("+")[-1]
-            r = r.strip("-")     
-            if r in mEEG.index:
-                strEEG.append(mEEG.loc[str(r)][0])
-            elif r in mSemio.index:
-                strSemio.append(mSemio.loc[str(r)][0])
-            elif str("+" + r) in mModifiers.index:
-                strMod.append(str(mModifiers.loc[str("+" + r)][0]))
-            elif str(r) in mModifiers.index:
-                strMod.append(str("with " + mModifiers.loc[str(r)][0]))
-            elif r in mAnatomy.index:
-                strAna.append(mAnatomy.loc[str(r)][0])
-            else:
-                strNotRecognized.append(r)
-
-        # make sure output order is always the same + return 
-        readable = ""
-        if strEEG is not []:
-            #strEEG = set(strEEG)
-            for e in sorted(strEEG):
-                readable += str(" " + e)
-        if strSemio is not []:
-            for m in sorted(strSemio):
-                readable += str(" " + m)
-        if strMod is not []:
-            for m in sorted(strMod):
-                readable += str(" " + m)
-        if strAna is not []:
-            for a in sorted(strAna):
-                readable += str(" " + a)     
-        if strNotRecognized is not []:
-            for m in sorted(strNotRecognized):
-                readable += str(" " + m)
-
-        readable = base + " " + readable
-        return readable
-
+"""
     testTags = ["e-BIRD-r-temp-ffluct",
                 "e-ASD-FZ",
                 "e-sw-FZ",
@@ -468,7 +511,7 @@ def main():
                 plain_text.append(t)
         plain_text = " ".join(plain_text)
         print(f"--> {plain_text}\n")
-
+"""
 
 
 

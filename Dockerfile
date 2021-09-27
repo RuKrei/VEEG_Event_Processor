@@ -8,6 +8,6 @@ ADD data/ app/data/
 
 RUN pip install plotly plotly-express mne pandas numpy
 
-CMD cd /app
+WORKDIR /app
 
 #CMD python /app/src/VEEG_processor.py
