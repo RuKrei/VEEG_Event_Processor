@@ -224,7 +224,17 @@ class EdfToDataFrame:
             for m in sorted(strNotRecognized):
                 readable += str(" " + m)
 
-        readable = base + " " + readable
+        # bring back the prefix
+        if string.startswith("e-"):
+            prefix = "e-"
+        elif string.startswith("s-"):
+            prefix = "s-"
+        else:
+            prefix = ""
+
+        readable = prefix + base + " " + readable
+        if readable.startswith(" "):
+            readable.lstrip(" ")
         return readable
     
     def raw_to_df(self):
@@ -245,8 +255,6 @@ class EdfToDataFrame:
         """
 
         pass
-
-
 
 def main():
     #Grab the .edf files
@@ -408,61 +416,56 @@ def main():
 
 
     # Plots/report for grand average
-
-    ga_report_title = subj_name + " - All seizures"
-    ga_report = Report(subject=subj_name, title=ga_report_title)
-
-    source="grand_average"
-
-    EEG["grand_average"], Semio["grand_average"], Test["grand_average"] = extract_ordered_groups(df=data["grand_average"])
-
-    ga_fig = plot_interactive_subplot_with_table(df=data["grand_average"], eeg=EEG["grand_average"], 
-                                                    semio=Semio["grand_average"], testing=Test["grand_average"], title=ga_report_title)
-
-    save_name = join("..", "results", "grand_average", "viz", str("grand_average_interactive_viz.html"))
-    if not os.path.isfile(save_name):
-        save_plotly_to_html(ga_fig, source=source)
-        cap = source + " VIZ --> All seizures"
+    def make_grand_average_report(df, name="grand_average"):
+        ga_report_title = subj_name + " - All seizures"
+        ga_report = Report(subject=subj_name, title=ga_report_title)
+        EEG[name], Semio[name], Test[name] = extract_ordered_groups(df=df)
+        
+        # grand_average figure
+        ga_fig = plot_interactive_subplot_with_table(df=df, eeg=EEG[name], 
+                                                    semio=Semio[name], testing=Test[name], title=ga_report_title)
+        cap = name + " VIZ --> All seizures"
         ga_report.add_htmls_to_section(ga_fig.to_html(full_html=False), 
-                                    section=source, captions=cap)
+                                    section=name, captions=cap)
 
-    # event counts (plot.ly)
-    event_counts = plot_interactive_eeg_and_semio(eeg=EEG[source], semio=Semio[source], source=source)
-    cap = source + " VIZ --> All event_conuts"
-    sec = source
-    ga_report.add_htmls_to_section(event_counts.to_html(full_html=False), section=sec, captions=cap)
-    # EEG
-    cap = source + " VIZ --> All EEG results"
-    print(EEG["grand_average"])
-    eeg_viz = plot_interactive_EEG_results(e_events=EEG["grand_average"], title=cap)
-    ga_report.add_htmls_to_section(eeg_viz.to_html(full_html=False), section=sec, captions=cap)
-    # Semiology
-    cap = source + " VIZ --> All Testing results"
-    testing_viz = plot_interactive_testing_results(t_events=Test[source], title=cap)
-    ga_report.add_htmls_to_section(testing_viz.to_html(full_html=False), section=sec, captions=cap)
-    # Testing
-    cap = source + " VIZ --> All Semiology results"
-    semio_viz = plot_interactive_semio_results(s_events=Semio[source], title=cap)
-    ga_report.add_htmls_to_section(semio_viz.to_html(full_html=False), section=sec, captions=cap)
+        # EEG
+        cap = name + " VIZ --> All EEG results"
+        eeg_viz = plot_interactive_EEG_results(e_events=EEG[name], title=cap)
+        ga_report.add_htmls_to_section(eeg_viz.to_html(full_html=False), section=name, captions=cap)
+        
+        # Testing
+        if name == "grand_average":          # Testing-Markers are not renamed, no point in visualizing them twice
+            cap = name + " VIZ --> All Testing results"
+            testing_viz = plot_interactive_testing_results(t_events=Test[name], title=cap)
+            ga_report.add_htmls_to_section(testing_viz.to_html(full_html=False), section=name, captions=cap)
+        
+        # Semiology
+        cap = name + " VIZ --> All Semiology results"
+        semio_viz = plot_interactive_semio_results(s_events=Semio[name], title=cap)
+        ga_report.add_htmls_to_section(semio_viz.to_html(full_html=False), section=name, captions=cap)
 
+        return ga_report
+
+    # Grand average report - original markers
+    ga_report = make_grand_average_report(df=data["grand_average"], name="grand_average")
     report_save_name = "../results/Grand_average_report.html"
     if win:
         report_save_name = "..\\results\\Grand_average_report.html"
     ga_report.save(report_save_name, overwrite=True)
+    base_dir = os.path.join ("..", "results")
+    data["grand_average"].to_csv(os.path.join(base_dir, "Data_grand_average.tsv"), sep="\t")
 
-
-
-    # Lazy grand average   
+    # Lazy grand average report  
     lazy_df = data["grand_average"].copy()
     for idx, val in enumerate(lazy_df["description"]):
         lazy_df["description"][idx] = edf_framer._marker_to_text(val)
-    #for val in  lazy_df[e]["description"]:
-    #lazy_df[e]["description"] = lazy_df[e]["description"].apply(edf_framer._marker_to_text())
-    print(lazy_df["description"])
-
-
-    
-    # to do --> do the visualiszation for lazy_grand average again or better refactor, so that there is no code duplication
+    base_dir = os.path.join ("..", "results")
+    lazy_df.to_csv(os.path.join(base_dir, "Lazy_grand_average.tsv"), sep="\t")  
+    lazy_ga_report = make_grand_average_report(df=lazy_df, name="readable_grand_average")
+    report_save_name = "../results/Readable_grand_average_report.html"
+    if win:
+        report_save_name = "..\\results\\Readable_grand_average_report.html"
+    lazy_ga_report.save(report_save_name, overwrite=True)
 
 
 

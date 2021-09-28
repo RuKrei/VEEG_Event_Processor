@@ -437,3 +437,29 @@ def plot_interactive_semio_results(s_events=None, title="Semiology results"):
     fig.update_layout(width=1100, height=800, title=title, xaxis_title="Time in seconds from onset")
     return fig
 
+def make_grand_average_report(df, name="grand_average"):
+    ga_report_title = subj_name + " - All seizures"
+    ga_report = Report(subject=subj_name, title=ga_report_title)
+    EEG[name], Semio[name], Test[name] = extract_ordered_groups(df=df)
+    
+    # grand_average figure
+    ga_fig = plot_interactive_subplot_with_table(df=df, eeg=EEG[name], 
+                                                semio=Semio[name], testing=Test[name], title=ga_report_title)
+    cap = name + " VIZ --> All seizures"
+    ga_report.add_htmls_to_section(ga_fig.to_html(full_html=False), 
+                                section=name, captions=cap)
+    # EEG
+    cap = name + " VIZ --> All EEG results"
+    eeg_viz = plot_interactive_EEG_results(e_events=EEG[name], title=cap)
+    ga_report.add_htmls_to_section(eeg_viz.to_html(full_html=False), section=name, captions=cap)
+    
+    # Semiology
+    cap = name + " VIZ --> All Testing results"
+    testing_viz = plot_interactive_testing_results(t_events=Test[name], title=cap)
+    ga_report.add_htmls_to_section(testing_viz.to_html(full_html=False), section=name, captions=cap)
+    
+    # Testing
+    cap = name + " VIZ --> All Semiology results"
+    semio_viz = plot_interactive_semio_results(s_events=Semio[name], title=cap)
+    ga_report.add_htmls_to_section(semio_viz.to_html(full_html=False), section=name, captions=cap)
+    return ga_report
