@@ -1,13 +1,12 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.10.3
 
-ADD src/VEEG_processor.py app/src/
-ADD src/utils.py app/src/
-ADD src/__init__.py app/src/
-ADD src/VEEG_config.xlsx app/src/
-ADD data/ app/data/
+ADD ./src/VEEG_processor.py /app/src/
+ADD ./src/VEEG_config.xlsx /app/src/
+ADD ./requirements.txt /app/src/
+ADD ./data/*.edf /app/data/
 
-RUN pip install plotly plotly-express mne pandas numpy
+RUN mkdir -p /app/results
+RUN pip install -r /app/src/requirements.txt
 
 WORKDIR /app
 
-#CMD python /app/src/VEEG_processor.py

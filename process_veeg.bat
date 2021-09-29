@@ -1,0 +1,1 @@
+powershell.exe /c C:\Windows\sysnative\wsl2.exe \\wsl$\Ubuntu-20.04\home\idrael\git\VEEG_Event_Processor\process_veeg.sh

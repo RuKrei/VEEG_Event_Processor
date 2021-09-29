@@ -16,19 +16,15 @@ from mne import Report
 import pandas as pd
 import numpy as np
 import platform
-#from utils import (get_parent_dir, extract_lab_sec, raw_to_df, extract_ordered_groups, save_plotly_to_html,
-#                        create_results_folders, plot_interactive_subplot_with_table,
-#                        plot_interactive_tables, plot_interactive_eeg_and_semio, plot_interactive_eventcount,
-#                        plot_interactive_testing_results, plot_interactive_EEG_results, plot_interactive_semio_results,
-#                        win_create_results_folders, write_excel_table)
+from shutil import copyfile
 
 
 # Configuration
 win = True if platform.system().lower().startswith("win") else False
 folder_splitter = "\\" if win else "/"
-CONFIG_FILE = os.path.join(os.getcwd(), "VEEG_config.xlsx")
+CONFIG_FILE = "/app/data/VEEG_config.xlsx"
 if not os.path.isfile(CONFIG_FILE):
-    CONFIG_FILE = os.path.join(os.getcwd(), "src/VEEG_config.xlsx")
+    raise Exception("No VEEG_config.xlsx - file found")
 print("Using configuration file: ", CONFIG_FILE)
 
 if not os.getcwd().endswith("src"):
@@ -672,7 +668,7 @@ class EdfToDataFrame:
 
 def main():
     #Grab the .edf files
-    Grab = Grabber(directory="../data")
+    Grab = Grabber(directory="/app/data")
     edfs = Grab.grab_edfs()
     subj_name = Grab.grab_subject_name()
     if win:
@@ -877,6 +873,9 @@ def main():
     if win:
         report_save_name = "..\\results\\Readable_grand_average_report.html"
     lazy_ga_report.save(report_save_name, overwrite=True)
+    
+    # Copy config file used to results directory
+    copyfile("/app/data/VEEG_config.xlsx", "/app/results/VEEG_config.xlsx")
 
 if __name__ == '__main__':
     main()
