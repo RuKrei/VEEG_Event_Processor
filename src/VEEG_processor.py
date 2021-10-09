@@ -1,4 +1,4 @@
-# Author: Rudi Kreidenhuber
+# Author: Rudi Kreidenhuber (Rudi.Kreidenhuber@gmail.com)
 # License: BSD (3-clause)
 
 
@@ -30,7 +30,6 @@ print("Using configuration file: ", CONFIG_FILE)
 if not os.getcwd().endswith("src"):
     os.chdir("./src")
     print(f"Changed working directory to {os.getcwd()}")
-
 
 
 # Helper functions
@@ -111,20 +110,6 @@ def write_excel_table(e_events=None, s_events=None, win=False):
             left_df.to_excel(writer, sheet_name="EEG_1", startcol=0, startrow=0, header=False, index=False)
         except Exception as e:
             print(f"Excel-File: Something went wrong trying to parse EEG-Events for {e}")
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     # Semiology events - pattern = index
     for e in e_events.keys():
@@ -153,24 +138,6 @@ def write_excel_table(e_events=None, s_events=None, win=False):
         except Exception as ex:
             print(f"Excel-File: Something went wrong trying to parse Semiology-Events for {s}:")
             print(ex)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     # Semiology-Events - list
     sem_left = ["Semiology", "", "File:", "Pattern 1:", "Pattern 2:", "Pattern 3:", "Pattern 4:", 
@@ -492,13 +459,11 @@ def plot_interactive_testing_results(t_events=None, title="Testing results"):
                     yaxis_title="")
     return fig
 
-
 def plot_interactive_EEG_results(e_events=None, title="EEG results"):
     fig = px.scatter(e_events, y=e_events["description"], x=e_events["time_from_onset"],
                         color=e_events["source"])
     fig.update_layout(width=1100, height=800, title=title, xaxis_title="Time in seconds from onset")
     return fig
-
 
 def plot_interactive_semio_results(s_events=None, title="Semiology results"):
     fig = px.scatter(s_events, y=s_events["description"], x=s_events["time_from_onset"],
