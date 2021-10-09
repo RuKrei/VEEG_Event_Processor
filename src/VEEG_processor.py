@@ -105,10 +105,10 @@ def write_excel_table(e_events=None, s_events=None, win=False):
                 df_e = pd.DataFrame(e_events[e], columns=["description"])
                 _, file = os.path.split(e)
                 df_e = df_e.rename(columns={"description": file.split(".edf")[0]})
-                df_e.to_excel(writer, sheet_name="EEG", startcol=(i+1), startrow=2, header=True, index=False)
+                df_e.to_excel(writer, sheet_name="EEG_1", startcol=(i+1), startrow=2, header=True, index=False)
                 i += 1
             left_df = pd.DataFrame(left)
-            left_df.to_excel(writer, sheet_name="EEG", startcol=0, startrow=0, header=False, index=False)
+            left_df.to_excel(writer, sheet_name="EEG_1", startcol=0, startrow=0, header=False, index=False)
         except Exception as e:
             print(f"Excel-File: Something went wrong trying to parse EEG-Events for {e}")
 
