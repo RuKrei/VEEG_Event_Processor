@@ -112,6 +112,66 @@ def write_excel_table(e_events=None, s_events=None, win=False):
         except Exception as e:
             print(f"Excel-File: Something went wrong trying to parse EEG-Events for {e}")
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # Semiology events - pattern = index
+    for e in e_events.keys():
+        _, file = os.path.split(e)
+        try:
+            if e_events[e].empty:
+                print(f"Empty EEG-List --> {e_events[e]}, omitting")
+            else:
+                try:
+                    # merge 2 dataframes
+                    new_df = pd.DataFrame(e_events[e], columns=["description", "order_of_occurence"])
+                    new_df = new_df.rename(columns={"order_of_occurence": file.split(".edf")[0]})
+                    df_e = pd.merge(df_e, new_df, how="outer", on="description", suffixes=(" ", "  "))
+                except Exception as ex:
+                    # there is no dataframe to start with, so create one
+                    print(ex)
+                    df_e = pd.DataFrame(e_events[e], columns=["description", "order_of_occurence"])
+                    df_e = df_e.rename(columns={"order_of_occurence": file.split(".edf")[0]})
+                
+                # write to file
+                df_e.to_excel(writer, sheet_name="EEG_2", startcol=1, startrow=3, header=True, index=False)
+            sem_left = ["EEG", ""]
+            sem_left_df = pd.DataFrame(sem_left)
+            sem_left_df.to_excel(writer, sheet_name="EEG_2", startcol=0, startrow=0, header=False, index=False)
+            writer.save()
+        except Exception as ex:
+            print(f"Excel-File: Something went wrong trying to parse Semiology-Events for {s}:")
+            print(ex)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     # Semiology-Events - list
     sem_left = ["Semiology", "", "File:", "Pattern 1:", "Pattern 2:", "Pattern 3:", "Pattern 4:", 
                 "Pattern 5:", "Pattern 6:", "Pattern 7:",
