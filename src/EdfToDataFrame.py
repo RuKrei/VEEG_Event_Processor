@@ -1,3 +1,12 @@
+import os
+from os.path import join
+import mne
+import re
+from mne import Report
+import pandas as pd
+import numpy as np
+from shutil import copyfile
+
 class EdfToDataFrame:
     """Loads an .edf-file, determines seizure onset and saves all markers to a pandas DataFrame"""
 
