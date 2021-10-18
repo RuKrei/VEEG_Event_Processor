@@ -10,8 +10,10 @@ from shutil import copyfile
 class EdfToDataFrame:
     """Loads an .edf-file, determines seizure onset and saves all markers to a pandas DataFrame"""
 
-    def __init__(self, edf) -> pd.DataFrame:
+    def __init__(self, edf=None, config_file=None, folder_splitter=None) -> pd.DataFrame:
         self.edf = edf
+        self.config_file = config_file
+        self.folder_splitter = folder_splitter
 
     def _return_raw(self):
         return mne.io.read_raw(self.edf, preload = True)
@@ -37,28 +39,28 @@ class EdfToDataFrame:
     
     def _add_source_column(self, df):
         # Add source column to the left
-        df["source"] = self.edf.split(folder_splitter)[-1].split(".edf")[0]
+        df["source"] = self.edf.split(self.folder_splitter)[-1].split(".edf")[0]
         cols = list(df)
         cols.insert(0, cols.pop(cols.index('source')))
         return df.loc[:, cols], df["source"][0]
     
-    def _read_config_file(self, config=CONFIG_FILE):
-        mEEG = pd.read_excel(CONFIG_FILE, sheet_name="EEG")
+    def _read_config_file(self, config_file):
+        mEEG = pd.read_excel(config_file, sheet_name="EEG")
         mEEG = mEEG[["mName", "mTranslation", "mSubstitution"]]
         mEEG.dropna(how="all", inplace=True)
         mEEG = mEEG.set_index("mName")
 
-        mSemio = pd.read_excel(CONFIG_FILE, sheet_name="Semio")
+        mSemio = pd.read_excel(config_file, sheet_name="Semio")
         mSemio = mSemio[["mName", "mTranslation", "mSubstitution"]]
         mSemio.dropna(how="all", inplace=True)
         mSemio = mSemio.set_index("mName")
 
-        mModifiers = pd.read_excel(CONFIG_FILE, sheet_name="Modifiers")
+        mModifiers = pd.read_excel(config_file, sheet_name="Modifiers")
         mModifiers = mModifiers[["mName", "mTranslation", "mSubstitution"]]
         mModifiers.dropna(how="all", inplace=True)
         mModifiers = mModifiers.set_index("mName")
 
-        mAnatomy = pd.read_excel(CONFIG_FILE, sheet_name="Anatomy")
+        mAnatomy = pd.read_excel(config_file, sheet_name="Anatomy")
         mAnatomy = mAnatomy[["mName", "mTranslation", "mSubstitution"]]
         mAnatomy.dropna(how="all", inplace=True)
         mAnatomy = mAnatomy.set_index("mName")
@@ -74,7 +76,7 @@ class EdfToDataFrame:
           type: EEG, Semio, Testing
           markers_code: e-"IAmTheBaseName"
         """
-        mEEG, mSemio, mModifiers, mAnatomy = self._read_config_file()
+        mEEG, mSemio, mModifiers, mAnatomy = self._read_config_file(config_file=self.config_file)
         d = dict()
         readbable = str()
         # ignore the i- markers - not need to translate those
@@ -211,3 +213,7 @@ class EdfToDataFrame:
             df ([pandas.DataFrame]): Output of EdfToDataFrame.raw_to_df
         """
         pass
+
+if __name__ == '__main__':
+    pass
+    # Create

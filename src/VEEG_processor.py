@@ -18,19 +18,22 @@ import Grabber
 
 # Configuration
 ipynb = False
-win = True if platform.system().lower().startswith("win") else False
-folder_splitter = "\\" if win else "/"
-CONFIG_FILE = "/app/data/VEEG_config.xlsx"
-if not os.path.isfile(CONFIG_FILE):
-    raise Exception("No VEEG_config.xlsx - file found")
-print("Using configuration file: ", CONFIG_FILE)
+
+
+
+def main():
+    win = True if platform.system().lower().startswith("win") else False
+    folder_splitter = "\\" if win else "/"
+    CONFIG_FILE = "/app/data/VEEG_config.xlsx"
+    if not os.path.isfile(CONFIG_FILE):
+        CONFIG_FILE = "../data/VEEG_config.xlsx"
+    if not os.path.isfile(CONFIG_FILE):
+        raise Exception("No VEEG_config.xlsx - file found")
+    print("Using configuration file: ", CONFIG_FILE)
 
 if not os.getcwd().endswith("src"):
     os.chdir(os.path.join(".", folder_splitter, "src"))
     print(f"Changed working directory to {os.getcwd()}")
-
-
-def main():
     Grab = Grabber(directory="/app/data")
     edfs = Grab.grab_edfs()
     subj_name = Grab.grab_subject_name()
@@ -44,7 +47,7 @@ def main():
 
     for e in edfs:
         print(f"Now processing file: {e}")
-        edf_framer = EdfToDataFrame(e)
+        edf_framer = EdfToDataFrame(e, CONFIG_FILE)
         df[e], onset = edf_framer.raw_to_df()
         e_events[e], s_events[e], t_events[e] = h.extract_ordered_groups(df[e])
 
