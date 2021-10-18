@@ -1,1 +1,6 @@
-powershell.exe /c C:\Windows\sysnative\wsl2.exe \\wsl$\Ubuntu-20.04\home\idrael\git\VEEG_Event_Processor\process_veeg.sh
+@echo on
+call C:\Users\rudik\miniconda3\Scripts\activate.bat
+call conda activate mne023_4
+cd .\src\
+jupyter notebook VEEG.ipynb
+pause

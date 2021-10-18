@@ -1,6 +1,8 @@
+import os
+import glob
 class Grabber:
     """Returns a list of .edf files in ../data/ directory"""
-    def __init__(self, directory) -> list:
+    def __init__(self, directory=None) -> list:
         self.directory = directory
 
     def grab_edfs(self) -> list:
