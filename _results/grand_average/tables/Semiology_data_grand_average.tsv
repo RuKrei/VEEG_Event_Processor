@@ -1,0 +1,19 @@
+	source 	description	time_from_onset 	order_of_occurence 	source  	time_from_onset  	order_of_occurence  	source 	time_from_onset 	order_of_occurence 	source  	time_from_onset  	order_of_occurence  	source 	time_from_onset 	order_of_occurence 	source  	time_from_onset  	order_of_occurence  	source	time_from_onset	order_of_occurence
+0	PP05071984_fbtc_15062020_1512	s-Arrest	7.660000000000025	1.0																		
+1	PP05071984_fbtc_15062020_1512	s-AutomatOEx-l	14.470000000000027	2.0																		
+2	PP05071984_fbtc_15062020_1512	s-Myoklonien Gesicht	50.46000000000001	3.0																		
+3	PP05071984_fbtc_15062020_1512	s-Zucken li Auge	51.82000000000002	4.0																		
+4		s-DystonieMundwinkel-r			PP05071984_fbtc_16082020_1710	54.23000000000002	1.0										PP05071984_fbtc_16082020_1725	13.589999999999975	2.0			
+5		s-KloniMundwinkel-r			PP05071984_fbtc_16082020_1710	54.440000000000055	2.0															
+6		s-blinzeln						PP05071984_fbtc_19082020_1202	14.789999999999992	1.0												
+7		s-tonische Phase						PP05071984_fbtc_19082020_1202	15.590000000000003	2.0												
+8		s-LetzterKlonus-r						PP05071984_fbtc_19082020_1202	38.359999999999985	3.0												
+9		s-Blick-l									PP05071984_fbtc_16082020_2002	13.710000000000036	1.0									
+10		s-seufzt?												PP05071984_fbtc_15062020_2128	11.579999999999998	1.0				PP05071984_fbtc_19082020_1553	25.47	1.0
+11		s-AutomatismusOEx-l												PP05071984_fbtc_15062020_2128	24.61999999999999	2.0						
+12		s-Beginn												PP05071984_fbtc_15062020_2128	27.049999999999997	3.0						
+13		s-Kloni-l												PP05071984_fbtc_15062020_2128	71.99999999999999	4.0						
+14		s-Blick-r															PP05071984_fbtc_16082020_1725	9.95999999999998	1.0	PP05071984_fbtc_19082020_1553	47.36	3.0
+15		s-Tetraflexion-r															PP05071984_fbtc_16082020_1725	14.740000000000009	3.0			
+16		s-Blinzeln																		PP05071984_fbtc_19082020_1553	39.519999999999996	2.0
+17		s-Kopfwwndung-r																		PP05071984_fbtc_19082020_1553	47.56	4.0
